@@ -1,9 +1,9 @@
 # LOCK N ROLL Team Implementation Spec
 
-> Version: v1.4 / 2026-05-09
+> Version: v1.5 / 2026-05-09
 > Audience: Blockchain, Backend, Frontend implementers
 > Status: Shared source of truth for v1 implementation
-> Change log: v1.4 incorporates 4-agent cross-review fixes (C1-C5, H1-H8) with tone adjustments per spec author.
+> Change log: v1.5 reflects B0 spike pass — Plan B and B0-conditional items removed. Earlier review fixes through v1.4 (C1-C5, H1-H8) are already incorporated in the body.
 
 ---
 
@@ -13,25 +13,21 @@ This document is the single implementation reference for LOCK N ROLL v1. It is w
 
 `docs/design-document.md` is authoritative. `docs/architecture.md` is deprecated and must not be used for implementation decisions.
 
-### 0.1 v1.3 → v1.4 Changes
+### 0.1 v1.4 → v1.5 Changes
 
-| ID | Area | Change |
-|---|---|---|
-| C1 | Settlement instructions | Defensive `listing_token_ata` balance sweep added to `buy_now`, `accept_bid`, `cancel_listing`, `claim_expired`. |
-| C2 | DB schema | `discount_rate` GENERATED column gets explicit numeric casts to make precision intent clear and avoid ORM/migration ambiguity. |
-| C3 | WS payloads | `event_type: "withdraw"` typo corrected to `"withdrawn"`. |
-| C4 | Env constants | `EXPECTED_STREAMFLOW_VERSION` slot added and must be filled from B0 spike output before `create_listing` decode logic merges. |
-| C5 | Eligibility guards | §2.3 split into "Streamflow Tradable Contracts requirements" (2 fields) and "LOCK N ROLL marketplace policy" (4 fields) groups. |
-| H1 | Nonce | Listing PDA nonce strategy specified: `u64` from `crypto.getRandomValues()`; on `NonceCollision` retry. |
-| H2 | Indexer | `processed_events.event_index` defined as 0-based ordinal of `emit!` events in `tx.meta.innerInstructions`/log order. |
-| H3 | Indexer | `best_bid_price_micro_usdc` recompute SQL spelled out. |
-| H4 | SDK | All 7 SDK methods get explicit param types in §5.1. |
-| H5 | DB constraint | `expires_at > created_at + 1h` half of CHECK dropped to avoid Solana-clock vs Postgres-clock false rejects. |
-| H6 | Shared types | `StreamCandidate` moved from §5.2 to §6.2 shared types. |
-| H7 | Plan B | Tone tightened: B0 failure means stop/re-scope; alternatives are maker co-sign settlement or SPL escrow with reduced UX guarantees, not promised v1 functionality. |
-| H8 | CPI authority | §3.2 documents that the wrapper uses `AccountInfo<'info>` for `authority` and the actual signing path is raw `solana_program::invoke_signed`, intentionally bypassing Anchor's `Signer` typing. |
-| Extra | Token program scope | v1 supports classic SPL Token only. Token-2022 mints are out of scope and rejected at create_listing. |
-| Extra | Compute budget | Settlement transactions must measure CU during B0 / Anchor tests and prepend `set_compute_unit_limit(measured * 1.2)`. |
+Following the B0 spike pass (`listing_pda` confirmed able to authorize Streamflow recipient transfer via signer seeds):
+
+| Area | Change |
+|---|---|
+| §1 Canonical decisions | Removed "Streamflow integration risk" row — risk resolved |
+| §6.1 Environment constants | `EXPECTED_STREAMFLOW_VERSION` guidance shifted from "awaiting B0" to "PR with measured Devnet value" |
+| §7.2 Critical Gates | Removed gate #1 (B0 spike); subsequent gates renumbered |
+| §7.3 Suggested Parallel Plan | Removed "B0 spike" from Day 1 Blockchain |
+| §9 Open Risks | Removed "Streamflow CPI from PDA" row (resolved) |
+| §9 Open Risks | Removed "Plan B if B0 spike fails" row (alternatives retired) |
+| Compute budget | CU measurement responsibility consolidated to D5 Anchor tests |
+
+The prior v1.3 → v1.4 review fixes (C1-C5, H1-H8) are already incorporated throughout the body and the changelog table has been removed. See git history (`6a77811`) if needed.
 
 ---
 
@@ -52,7 +48,6 @@ This document is the single implementation reference for LOCK N ROLL v1. It is w
 | Refund policy | Any `OPEN` bid whose listing is `SETTLED`, `CANCELLED`, or `EXPIRED` remains manually refundable via `withdraw_bid`. |
 | Pricing unit | `price_per_token_micro_usdc` is micro-USDC per one whole token. All on-chain settlement uses raw integer USDC units. |
 | Oracle scope | Pyth is used client/API side for display and guardrails in v1. On-chain price validation is Phase 2. |
-| Streamflow integration risk | Day 1 starts with a CPI spike proving recipient transfer from a program-owned listing PDA via signer seeds. If this fails, the team must stop and re-scope before building the main flow. See §9 for the conservative re-scope statement. |
 
 ---
 
@@ -610,12 +605,12 @@ Frontend and backend must use the same eligibility rules from §2.3 and surface 
 | `LOCK_N_ROLL_PROGRAM_ID` | `localnet` | `<DEV_LNR>` | `<PROD_LNR>` |
 | `STREAMFLOW_PROGRAM_ID` | `streamflow-mock` | `HqDGZjaVRXJ9MGRQEw7qDc2rAr6iH1n1kAQdCZaCMfMZ` | `strmRqUCoQUgGUan5YhzUZa6KqdzwX5L6FpUxfmKg5m` |
 | `USDC_MINT` | local test mint | devnet test USDC mint | canonical mainnet USDC mint |
-| `EXPECTED_STREAMFLOW_VERSION` | (matches Devnet stream value) | **TBD — capture from B0 spike output before any `create_listing` decode logic merges** | (matches Devnet unless an upgrade is observed; bump via PR after audit) |
+| `EXPECTED_STREAMFLOW_VERSION` | `4` | `4` | `4` (matches Devnet unless an upgrade is observed; bump via PR after audit) |
 | Anchor crate version | 0.30.x (pinned) | 0.30.x | 0.30.x |
 | streamflow-sdk crate version | 0.13.0 (pinned) | 0.13.0 | 0.13.0 |
-| `@streamflow/stream` package version | latest matching SDK 0.13.0 | latest matching SDK 0.13.0 | latest matching SDK 0.13.0 |
+| `@streamflow/stream` package version | 8.4.0 (pinned) | 8.4.0 | 8.4.0 |
 
-The team must fill real `USDC_MINT` and `EXPECTED_STREAMFLOW_VERSION` values before Devnet QA.
+The team must fill the real `USDC_MINT` value before Devnet QA. `EXPECTED_STREAMFLOW_VERSION = 4` was captured during the B0 spike and is now pinned. JS and Rust SDKs are versioned independently — `@streamflow/stream@8.4.0` pairs with `streamflow-sdk = "=0.13.0"` for v1.
 
 ### 6.2 Shared Types
 
@@ -667,16 +662,15 @@ type StreamCandidate = {
 
 ### 7.2 Critical Gates
 
-1. **B0 Streamflow CPI spike**: prove `listing_pda` can transfer recipient via signer seeds. Record the Devnet `contract.version` value and use it to fill `EXPECTED_STREAMFLOW_VERSION` (C4).
-2. **IDL freeze**: after instruction accounts and events are stable, Backend and Frontend consume one IDL.
-3. **Indexer event replay test**: processed event idempotency must pass before UI relies on live data.
-4. **Devnet end-to-end settlement**: one Buy Now and one Accept Bid path must pass with real Streamflow metadata, including a non-zero sweep test (manually deposit a few tokens into `listing_token_ata` and confirm sweep on settlement).
+1. **IDL freeze**: after instruction accounts and events are stable, Backend and Frontend consume one IDL.
+2. **Indexer event replay test**: processed event idempotency must pass before UI relies on live data.
+3. **Devnet end-to-end settlement**: one Buy Now and one Accept Bid path must pass with real Streamflow metadata, including a non-zero sweep test (manually deposit a few tokens into `listing_token_ata` and confirm sweep on settlement).
 
 ### 7.3 Suggested Parallel Plan
 
 | Phase | Blockchain | Backend | Frontend |
 |---|---|---|---|
-| Day 1 | B0 spike, program scaffold, PDA structs | DB migration draft | Wallet setup, network constants, stream picker wrapper |
+| Day 1 | program scaffold, PDA structs, Streamflow adapter interface | DB migration draft | Wallet setup, network constants, stream picker wrapper |
 | Day 2 | Streamflow adapter, decode helpers, create listing (incl. Token-2022 reject) | REST skeleton, error envelope | Create listing form and account builder draft |
 | Day 3 | submit/withdraw bid, Buy Now (with sweep) | Indexer parser skeleton | Market/listing queries and transaction state |
 | Day 4 | Accept Bid (with sweep), cancel/expire (with sweep) | Processed event ledger, event handlers | Bid and settlement flows |
@@ -719,7 +713,6 @@ type StreamCandidate = {
 
 | Item | Decision / mitigation |
 |---|---|
-| Streamflow CPI from PDA | Must be proven by B0 before main implementation continues. |
 | Streamflow SDK version drift | Pin `streamflow-sdk = "=0.13.0"` and `@streamflow/stream` matching version; keep `EXPECTED_STREAMFLOW_VERSION` explicit and bump only via reviewed PR. |
 | Destination ATA creation | Frontend creates missing ATAs before program calls; on-chain validates canonical ATA addresses. |
 | `listing_token_ata` orphan tokens | Defensive sweep on settlement/cancel/expire (§3.3). With `automatic_withdrawal == false` the normal Streamflow flow does not auto-deposit, so sweep is expected to be a no-op in production; the path is preserved for unexpected deposits and forensic visibility. |
@@ -730,7 +723,6 @@ type StreamCandidate = {
 | Address Lookup Tables | Settlement account fanout (listing PDA, bid PDA, vault, two USDC ATAs, Streamflow accounts, programs) is borderline for v0 transactions. If simulation exceeds limits during D5 measurement, introduce an ALT in the SDK before D6 Devnet deploy. |
 | Token-2022 mints | Out of scope for v1. `create_listing` must check `token_mint.owner == spl_token::ID` and reject with `TokenProgramNotSupported` (6106). |
 | Anchor `Optional<Account>` patterns | Avoided: settlement is split into `buy_now` and `accept_bid`. No optional accounts in the IDL. |
-| **Plan B if B0 spike fails** | If `listing_pda` cannot be the Streamflow transfer authority via `invoke_signed`, the v1 design as specified is not implementable. The team must stop and re-scope; do not silently substitute an alternative. Possible re-scope directions are (a) maker co-sign settlement, where maker's wallet co-signs every Buy Now / Accept Bid transaction and Streamflow CPI is invoked with maker authority, or (b) a traditional SPL escrow model where vested tokens are deposited into a LOCK N ROLL escrow PDA after unlock. Both alternatives lose the "instant Buy Now without maker presence" UX guarantee that v1's atomic settlement provides; neither is promised v1 functionality and both require new PRD review before implementation begins. |
 
 ---
 

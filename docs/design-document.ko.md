@@ -1,9 +1,9 @@
 # LOCK N ROLL 팀 구현 스펙
 
-> 버전: v1.4 / 2026-05-09
+> 버전: v1.5 / 2026-05-09
 > 대상: Blockchain, Backend, Frontend 구현 담당자
 > 상태: v1 구현을 위한 팀 공통 기준 문서
-> 변경 로그: v1.4는 4-Agent 교차 검토 결과(C1-C5, H1-H8)를 톤 조정하여 반영
+> 변경 로그: v1.5는 B0 스파이크 통과를 반영해 Plan B 및 B0 조건부 항목을 제거. 직전 v1.4까지의 검토 픽스(C1-C5, H1-H8)는 본문에 이미 반영됨
 
 > 영문 원본은 `design-document.md`. 두 파일이 충돌하면 영문 버전이 정본.
 
@@ -15,25 +15,21 @@
 
 `docs/design-document.md`(영문) / `docs/design-document.ko.md`(국문)이 정본입니다. `docs/architecture.md`는 deprecated이며 구현 결정에 사용하지 마세요.
 
-### 0.1 v1.3 → v1.4 변경 사항
+### 0.1 v1.4 → v1.5 변경 사항
 
-| ID | 영역 | 변경 |
-|---|---|---|
-| C1 | 결제 인스트럭션 | `buy_now`, `accept_bid`, `cancel_listing`, `claim_expired`에 `listing_token_ata` 잔고 sweep을 방어적으로 추가 |
-| C2 | DB 스키마 | `discount_rate` GENERATED 컬럼에 명시적 numeric 캐스팅을 넣어 정밀도 의도를 분명히 하고 ORM/마이그레이션 모호성을 차단 |
-| C3 | WS payload | `event_type: "withdraw"` 오타를 `"withdrawn"`으로 정정 |
-| C4 | 환경 상수 | `EXPECTED_STREAMFLOW_VERSION` 슬롯 추가. `create_listing` 디코드 로직 머지 전 B0 spike 결과로 채워야 함 |
-| C5 | Eligibility 가드 | §2.3을 "Streamflow Tradable Contracts 요구사항(2개)" / "LOCK N ROLL 정책(4개)" 두 그룹으로 분리 |
-| H1 | nonce 전략 | Listing PDA nonce는 `crypto.getRandomValues()`로 생성한 u64. `NonceCollision` 시 retry |
-| H2 | Indexer | `processed_events.event_index`를 `tx.meta.innerInstructions`/log 순서 0-base ordinal로 정의 |
-| H3 | Indexer | `best_bid_price_micro_usdc` recompute SQL 명시 |
-| H4 | SDK | 7개 SDK 메서드 모두에 명시적 param 타입 정의 (§5.1) |
-| H5 | DB 제약 | `expires_at > created_at + 1h` 부분 제거. created_at은 indexer ingest time이라 Solana 클럭과 섞이면 false reject 발생 |
-| H6 | Shared types | `StreamCandidate`를 §5.2에서 §6.2 shared types로 이동 |
-| H7 | Plan B | 톤 보수화: B0 실패 시 stop/re-scope. 대안은 maker co-sign settlement 또는 SPL escrow이며 v1의 Buy Now 무허가 즉시체결 UX는 보장하지 않음 |
-| H8 | CPI authority | §3.2 wrapper의 `authority`는 `AccountInfo<'info>`이고 실제 서명은 raw `solana_program::invoke_signed`로 처리 (Anchor `Signer` 타이핑 의도적 우회) |
-| 추가 | Token program 범위 | v1은 classic SPL Token만. Token-2022는 범위 외이며 create_listing에서 거부 |
-| 추가 | Compute budget | 결제 트랜잭션은 B0/Anchor 테스트에서 CU 측정 후 `set_compute_unit_limit(measured * 1.2)` 적용 |
+B0 스파이크 통과(`listing_pda`가 signer seeds로 Streamflow recipient transfer 가능 확인)에 따른 정리:
+
+| 영역 | 변경 |
+|---|---|
+| §1 Canonical 결정 | "Streamflow 통합 리스크"(B0 spike 행) 제거 — 위험 해소 |
+| §6.1 환경 상수 | `EXPECTED_STREAMFLOW_VERSION`을 "B0 결과 대기"에서 "Devnet 측정값으로 PR" 톤으로 변경 |
+| §7.2 Critical Gates | 게이트 #1(B0 spike) 제거 후 후속 게이트 번호 정리 |
+| §7.3 권장 병렬 계획 | Day 1 Blockchain 항목에서 "B0 spike" 제거 |
+| §9 Open Risks | "PDA로부터의 Streamflow CPI" 행 제거 (해소됨) |
+| §9 Open Risks | "B0 spike 실패 시 Plan B" 행 제거 (분기 폐기) |
+| Compute budget | 측정 책임을 D5 Anchor 테스트로 단일화 |
+
+직전 v1.3 → v1.4 검토 픽스(C1-C5, H1-H8)는 본 문서 본문에 모두 반영되어 changelog 표는 제거됨. 필요 시 git history(`6a77811`) 참조.
 
 ---
 
@@ -54,7 +50,6 @@
 | 환불 정책 | listing이 `SETTLED`/`CANCELLED`/`EXPIRED`인 상태의 OPEN bid는 `withdraw_bid`로 수동 환불 가능 |
 | 가격 단위 | `price_per_token_micro_usdc`는 1 whole token당 micro-USDC. 온체인 결제는 모두 raw integer USDC unit |
 | 오라클 범위 | v1에서 Pyth는 클라이언트/API의 표시 및 가드용. 온체인 가격 검증은 Phase 2 |
-| Streamflow 통합 리스크 | Day 1 첫 작업은 program-owned listing PDA가 signer seeds로 recipient transfer를 호출 가능한지 증명하는 CPI spike. 실패 시 메인 플로우 빌드를 중단하고 재범위 산정. §9의 보수적 재범위 안 참고 |
 
 ---
 
@@ -611,12 +606,12 @@ Frontend와 Backend는 §2.3의 동일한 자격 규칙을 사용해야 하며, 
 | `LOCK_N_ROLL_PROGRAM_ID` | `localnet` | `<DEV_LNR>` | `<PROD_LNR>` |
 | `STREAMFLOW_PROGRAM_ID` | `streamflow-mock` | `HqDGZjaVRXJ9MGRQEw7qDc2rAr6iH1n1kAQdCZaCMfMZ` | `strmRqUCoQUgGUan5YhzUZa6KqdzwX5L6FpUxfmKg5m` |
 | `USDC_MINT` | local test mint | devnet test USDC mint | canonical mainnet USDC mint |
-| `EXPECTED_STREAMFLOW_VERSION` | (Devnet stream 값과 일치) | **TBD — `create_listing` 디코드 로직 머지 전 B0 spike 결과로 채울 것** | (업그레이드 관측되지 않는 한 Devnet과 일치; audit 후 PR로 변경) |
+| `EXPECTED_STREAMFLOW_VERSION` | `4` | `4` | `4` (업그레이드 관측되지 않는 한 Devnet과 일치; audit 후 PR로 변경) |
 | Anchor crate 버전 | 0.30.x (핀) | 0.30.x | 0.30.x |
 | streamflow-sdk crate 버전 | 0.13.0 (핀) | 0.13.0 | 0.13.0 |
-| `@streamflow/stream` 패키지 버전 | SDK 0.13.0과 매칭되는 latest | 동일 | 동일 |
+| `@streamflow/stream` 패키지 버전 | 8.4.0 (핀) | 8.4.0 | 8.4.0 |
 
-Devnet QA 전 실제 `USDC_MINT`와 `EXPECTED_STREAMFLOW_VERSION` 값을 채워야 합니다.
+Devnet QA 전 실제 `USDC_MINT` 값을 채워야 합니다. `EXPECTED_STREAMFLOW_VERSION = 4`는 B0 스파이크에서 확인된 값으로 핀됨. JS와 Rust SDK는 독립적으로 버저닝되며, v1은 `@streamflow/stream@8.4.0` + `streamflow-sdk = "=0.13.0"` 조합을 사용합니다.
 
 ### 6.2 공통 타입
 
@@ -668,16 +663,15 @@ type StreamCandidate = {
 
 ### 7.2 Critical Gates
 
-1. **B0 Streamflow CPI spike**: `listing_pda`가 signer seeds로 recipient transfer를 할 수 있음을 증명. Devnet `contract.version` 값을 기록하여 `EXPECTED_STREAMFLOW_VERSION`(C4)을 채움
-2. **IDL freeze**: 인스트럭션 account와 이벤트가 안정화된 후, Backend와 Frontend가 동일 IDL 사용
-3. **Indexer event replay 테스트**: UI가 라이브 데이터에 의존하기 전에 processed event idempotency 통과
-4. **Devnet end-to-end 결제**: 실제 Streamflow metadata로 Buy Now 1회 + Accept Bid 1회 성공. non-zero sweep 테스트 포함 (`listing_token_ata`에 토큰을 임의로 입금 후 settle 시 sweep 확인)
+1. **IDL freeze**: 인스트럭션 account와 이벤트가 안정화된 후, Backend와 Frontend가 동일 IDL 사용
+2. **Indexer event replay 테스트**: UI가 라이브 데이터에 의존하기 전에 processed event idempotency 통과
+3. **Devnet end-to-end 결제**: 실제 Streamflow metadata로 Buy Now 1회 + Accept Bid 1회 성공. non-zero sweep 테스트 포함 (`listing_token_ata`에 토큰을 임의로 입금 후 settle 시 sweep 확인)
 
 ### 7.3 권장 병렬 계획
 
 | 단계 | Blockchain | Backend | Frontend |
 |---|---|---|---|
-| Day 1 | B0 spike, program scaffold, PDA struct | DB 마이그레이션 초안 | wallet setup, network 상수, stream picker wrapper |
+| Day 1 | program scaffold, PDA struct, Streamflow 어댑터 인터페이스 | DB 마이그레이션 초안 | wallet setup, network 상수, stream picker wrapper |
 | Day 2 | Streamflow adapter, decode helpers, create_listing (Token-2022 거부 포함) | REST 골격, error envelope | create listing 폼, account builder 초안 |
 | Day 3 | submit_bid/withdraw_bid, Buy Now (sweep 포함) | indexer parser 골격 | market/listing 쿼리, 트랜잭션 상태 |
 | Day 4 | Accept Bid (sweep 포함), cancel/expire (sweep 포함) | processed event ledger, 이벤트 핸들러 | bid 및 결제 흐름 |
@@ -720,7 +714,6 @@ type StreamCandidate = {
 
 | 항목 | 결정 / 완화 |
 |---|---|
-| PDA로부터의 Streamflow CPI | 메인 구현 진행 전 B0가 증명해야 함 |
 | Streamflow SDK 버전 drift | `streamflow-sdk = "=0.13.0"`과 매칭되는 `@streamflow/stream` 핀; `EXPECTED_STREAMFLOW_VERSION`을 명시적으로 유지하고 리뷰된 PR로만 bump |
 | Destination ATA 생성 | Frontend가 program 호출 전에 누락 ATA 생성; 온체인은 canonical ATA 주소 검증 |
 | `listing_token_ata` orphan 토큰 | settle/cancel/expire에서 방어적 sweep (§3.3). `automatic_withdrawal == false`로 정상 Streamflow flow는 자동 입금하지 않으므로 sweep은 production에서 no-op이 기본; 예상 외 입금과 forensic 가시성을 위해 경로 보존 |
@@ -731,7 +724,6 @@ type StreamCandidate = {
 | Address Lookup Tables | 결제 account fanout(listing PDA, bid PDA, vault, USDC ATA 2개, Streamflow 계정, program)이 v0 트랜잭션 한계에 근접. D5 측정에서 시뮬레이션이 한계 초과 시 D6 Devnet 배포 전 SDK에 ALT 도입 |
 | Token-2022 mint | v1 범위 외. `create_listing`은 `token_mint.owner == spl_token::ID` 검증 후 `TokenProgramNotSupported`(6106)로 거부 |
 | Anchor `Optional<Account>` 패턴 | 회피: 결제는 `buy_now`와 `accept_bid`로 분리. IDL에 optional account 없음 |
-| **B0 spike 실패 시 Plan B** | `invoke_signed`로 `listing_pda`가 Streamflow transfer authority가 될 수 없다면, 명세된 v1 설계는 구현 불가. 팀은 중단하고 재범위 산정해야 함 — 대안을 silent하게 substitute하지 말 것. 가능한 재범위 방향은 (a) maker co-sign settlement: 모든 Buy Now / Accept Bid 트랜잭션에 maker wallet이 co-sign하고 Streamflow CPI는 maker authority로 호출, 또는 (b) 전통적 SPL escrow 모델: unlock 후 vested 토큰을 LOCK N ROLL escrow PDA에 입금. 두 대안 모두 v1의 원자적 결제가 제공하는 "maker 부재 즉시 Buy Now" UX 보장을 잃으며, 어느 것도 v1 약속 기능이 아니고 구현 시작 전 새 PRD 검토 필요 |
 
 ---
 
