@@ -1,0 +1,100 @@
+@import "tw-animate-css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  /* ─────────────────────────────────────────────────────────────
+     LOCK N ROLL — Neon Design System
+     - Single accent: oklch(0.78 0.165 162)  ≈ #34d59a (neon green)
+     - Layered near-black surfaces for depth
+     - Sharp 4px cards (--radius), pill 9999px buttons
+     ───────────────────────────────────────────────────────────── */
+
+  /* Light fallback (we never render light — kept for shadcn primitives) */
+  :root {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.78 0.165 162);
+    --primary-foreground: oklch(0.04 0 0);
+    --secondary: oklch(0.97 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.78 0.165 162);
+    --accent-foreground: oklch(0.04 0 0);
+    --destructive: oklch(0.577 0.245 27.325);
+    --border: oklch(0.922 0 0);
+    --input: oklch(0.922 0 0);
+    --ring: oklch(0.78 0.165 162);
+    --chart-1: oklch(0.78 0.165 162);
+    --chart-2: oklch(0.6 0 0);
+    --chart-3: oklch(0.45 0 0);
+    --chart-4: oklch(0.3 0 0);
+    --chart-5: oklch(0.2 0 0);
+    --radius: 0.25rem; /* 4px sharp cards */
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.78 0.165 162);
+    --sidebar-primary-foreground: oklch(0.04 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.78 0.165 162);
+  }
+
+  /* The actual product runs under .dark always (forced in layout.tsx) */
+  .dark {
+    --background: oklch(0 0 0); /* #000 — pure black */
+    --foreground: oklch(0.93 0 0); /* #ededed — primary text */
+    --card: oklch(0.04 0 0); /* #0a0a0a — surface-1 */
+    --card-foreground: oklch(0.93 0 0);
+    --popover: oklch(0.07 0 0); /* #131313 — surface-2 */
+    --popover-foreground: oklch(0.93 0 0);
+    --primary: oklch(0.78 0.165 162); /* neon green #34d59a */
+    --primary-foreground: oklch(0.04 0 0);
+    --secondary: oklch(0.07 0 0);
+    --secondary-foreground: oklch(0.93 0 0);
+    --muted: oklch(0.07 0 0);
+    --muted-foreground: oklch(0.4 0 0); /* #5a5a5a */
+    --accent: oklch(0.78 0.165 162);
+    --accent-foreground: oklch(0.04 0 0);
+    --destructive: oklch(0.55 0.22 25);
+    --border: oklch(1 0 0 / 8%);
+    --input: oklch(1 0 0 / 12%);
+    --ring: oklch(0.78 0.165 162);
+    --chart-1: oklch(0.78 0.165 162);
+    --chart-2: oklch(0.6 0 0);
+    --chart-3: oklch(0.45 0 0);
+    --chart-4: oklch(0.3 0 0);
+    --chart-5: oklch(0.2 0 0);
+    --sidebar: oklch(0.04 0 0);
+    --sidebar-foreground: oklch(0.93 0 0);
+    --sidebar-primary: oklch(0.78 0.165 162);
+    --sidebar-primary-foreground: oklch(0.04 0 0);
+    --sidebar-accent: oklch(0.07 0 0);
+    --sidebar-accent-foreground: oklch(0.93 0 0);
+    --sidebar-border: oklch(1 0 0 / 8%);
+    --sidebar-ring: oklch(0.78 0.165 162);
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
