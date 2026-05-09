@@ -1,0 +1,62 @@
+# ─────────────────────────────────────────────────────────────────────
+# LOCK N ROLL — repo-wide ignore rules
+# ─────────────────────────────────────────────────────────────────────
+
+# Notion / private exports — never commit
+ExportBlock-*/
+*.notion-export/
+
+# Local AI/dev tooling state (per-developer, not shared)
+.bkit/
+.claude/
+.codex/
+.omc/
+.agents/
+.cursor/
+.aider*
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.keypair.json
+**/secrets/
+
+# Node / JS
+node_modules/
+dist/
+build/
+.next/
+.turbo/
+.pnpm-store/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Rust / Anchor
+target/
+**/*.rs.bk
+.anchor/
+
+# Python (if any tooling)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Logs / temp
+*.log
+*.tmp
+.cache/
+tmp/
