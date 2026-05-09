@@ -7,85 +7,187 @@
   .text-balance {
     text-wrap: balance;
   }
+  .text-display {
+    font-size: clamp(64px, 12vw, 176px);
+    line-height: 0.82;
+    letter-spacing: -0.04em;
+  }
+  .text-heading-lg {
+    font-size: clamp(40px, 6vw, 70px);
+    line-height: 0.92;
+    letter-spacing: -0.025em;
+  }
+  .text-heading {
+    font-size: clamp(28px, 3.5vw, 35px);
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+  }
+  .text-heading-sm {
+    font-size: 25px;
+    line-height: 1.13;
+    letter-spacing: -0.01em;
+  }
+  .text-subheading {
+    font-size: 21px;
+    line-height: 1.2;
+  }
+  .text-caption {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  .hero-word {
+    animation: hero-word-rise 920ms cubic-bezier(0.19, 1, 0.22, 1) both;
+    transform-origin: 50% 80%;
+    will-change: transform, opacity, filter;
+  }
+  .hero-copy {
+    animation: hero-copy-rise 780ms cubic-bezier(0.19, 1, 0.22, 1) 520ms both;
+    will-change: transform, opacity, filter;
+  }
+  .hero-logo-float {
+    animation:
+      hero-mark-rise 800ms cubic-bezier(0.19, 1, 0.22, 1) both,
+      hero-mark-float 5600ms ease-in-out 900ms infinite;
+    will-change: transform, opacity, filter;
+  }
+  .hero-accent {
+    animation: hero-accent-pulse 3600ms ease-in-out 1300ms infinite;
+  }
+  @keyframes hero-word-rise {
+    from {
+      opacity: 0;
+      filter: blur(16px);
+      transform: translate3d(0, 52px, 0) scale(0.94);
+    }
+    to {
+      opacity: 1;
+      filter: blur(0);
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+  }
+  @keyframes hero-copy-rise {
+    from {
+      opacity: 0;
+      filter: blur(10px);
+      transform: translate3d(0, 24px, 0);
+    }
+    to {
+      opacity: 1;
+      filter: blur(0);
+      transform: translate3d(0, 0, 0);
+    }
+  }
+  @keyframes hero-mark-rise {
+    from {
+      opacity: 0;
+      filter: blur(12px);
+      transform: translate3d(0, -18px, 0) scale(0.86) rotate(-8deg);
+    }
+    to {
+      opacity: 1;
+      filter: blur(0);
+      transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+    }
+  }
+  @keyframes hero-mark-float {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) rotate(0deg);
+    }
+    50% {
+      transform: translate3d(0, -10px, 0) rotate(3deg);
+    }
+  }
+  @keyframes hero-accent-pulse {
+    0%,
+    100% {
+      color: var(--brand-violet);
+      text-shadow: 0 0 0 rgba(203, 108, 230, 0);
+    }
+    50% {
+      color: #b450d4;
+      text-shadow: 0 18px 42px rgba(203, 108, 230, 0.3);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-word,
+    .hero-copy,
+    .hero-logo-float,
+    .hero-accent {
+      animation: none;
+    }
+  }
 }
 
 @layer base {
-  /* ─────────────────────────────────────────────────────────────
-     LOCK N ROLL — Neon Design System
-     - Single accent: oklch(0.78 0.165 162)  ≈ #34d59a (neon green)
-     - Layered near-black surfaces for depth
-     - Sharp 4px cards (--radius), pill 9999px buttons
-     ───────────────────────────────────────────────────────────── */
-
-  /* Light fallback (we never render light — kept for shadcn primitives) */
+  /* LOCK N ROLL — DESIGN.md (Ctrl Wallet style) layered on logo palette
+     Light, crisp surfaces. Bold display typography. Tinted feature cards.
+     Brand accents: brand-blue, brand-violet, brand-charcoal, brand-ice, brand-mist */
   :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.78 0.165 162);
-    --primary-foreground: oklch(0.04 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.78 0.165 162);
-    --accent-foreground: oklch(0.04 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.78 0.165 162);
-    --chart-1: oklch(0.78 0.165 162);
-    --chart-2: oklch(0.6 0 0);
-    --chart-3: oklch(0.45 0 0);
-    --chart-4: oklch(0.3 0 0);
-    --chart-5: oklch(0.2 0 0);
-    --radius: 0.25rem; /* 4px sharp cards */
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.78 0.165 162);
-    --sidebar-primary-foreground: oklch(0.04 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.78 0.165 162);
-  }
+    /* Logo palette (extracted from /brand/lock-n-roll-logo.png) */
+    --brand-blue: #587d9f;
+    --brand-violet: #cb6ce6;
+    --brand-charcoal: #30373f;
+    --brand-ice: #d6e0ed;
+    --brand-mist: #9babbf;
 
-  /* The actual product runs under .dark always (forced in layout.tsx) */
-  .dark {
-    --background: oklch(0 0 0); /* #000 — pure black */
-    --foreground: oklch(0.93 0 0); /* #ededed — primary text */
-    --card: oklch(0.04 0 0); /* #0a0a0a — surface-1 */
-    --card-foreground: oklch(0.93 0 0);
-    --popover: oklch(0.07 0 0); /* #131313 — surface-2 */
-    --popover-foreground: oklch(0.93 0 0);
-    --primary: oklch(0.78 0.165 162); /* neon green #34d59a */
-    --primary-foreground: oklch(0.04 0 0);
-    --secondary: oklch(0.07 0 0);
-    --secondary-foreground: oklch(0.93 0 0);
-    --muted: oklch(0.07 0 0);
-    --muted-foreground: oklch(0.4 0 0); /* #5a5a5a */
-    --accent: oklch(0.78 0.165 162);
-    --accent-foreground: oklch(0.04 0 0);
-    --destructive: oklch(0.55 0.22 25);
-    --border: oklch(1 0 0 / 8%);
-    --input: oklch(1 0 0 / 12%);
-    --ring: oklch(0.78 0.165 162);
-    --chart-1: oklch(0.78 0.165 162);
-    --chart-2: oklch(0.6 0 0);
-    --chart-3: oklch(0.45 0 0);
-    --chart-4: oklch(0.3 0 0);
-    --chart-5: oklch(0.2 0 0);
-    --sidebar: oklch(0.04 0 0);
-    --sidebar-foreground: oklch(0.93 0 0);
-    --sidebar-primary: oklch(0.78 0.165 162);
-    --sidebar-primary-foreground: oklch(0.04 0 0);
-    --sidebar-accent: oklch(0.07 0 0);
-    --sidebar-accent-foreground: oklch(0.93 0 0);
-    --sidebar-border: oklch(1 0 0 / 8%);
-    --sidebar-ring: oklch(0.78 0.165 162);
+    /* DESIGN.md neutral surfaces */
+    --color-absolute-black: #000000;
+    --color-polar-white: #ffffff;
+    --color-graphite: #30373f; /* mapped from brand-charcoal */
+    --color-light-ash: #f9faf9;
+    --color-pebble-gray: #ecefec;
+    --color-slate-dust: #eeeeee;
+    --color-muted-stone: #5a585a;
+    --color-deep-khaki: #6e726e;
+
+    /* shadcn surface tokens — page background matches logo's white canvas */
+    --background: #ffffff;
+    --foreground: #111820;
+    --card: #ffffff;
+    --card-foreground: #111820;
+    --popover: #ffffff;
+    --popover-foreground: #111820;
+    --primary: #30373f;
+    --primary-foreground: #ffffff;
+    --secondary: #ecefec;
+    --secondary-foreground: #111820;
+    --muted: #ecefec;
+    --muted-foreground: #5a585a;
+    --accent: #cb6ce6;
+    --accent-foreground: #ffffff;
+    --destructive: #d43c2f;
+    --destructive-foreground: #ffffff;
+    --border: #ecefec;
+    --input: #ecefec;
+    --ring: #30373f;
+    --chart-1: #587d9f;
+    --chart-2: #cb6ce6;
+    --chart-3: #30373f;
+    --chart-4: #9babbf;
+    --chart-5: #d6e0ed;
+    --radius: 17.56px;
+
+    /* DESIGN.md named radii */
+    --radius-card: 17.56px;
+    --radius-card-lg: 26.34px;
+    --radius-input: 35.12px;
+    --radius-button: 35.12px;
+    --radius-largebutton: 52.68px;
+
+    /* DESIGN.md spacing */
+    --section-gap: 26px;
+    --card-padding: 26px;
+    --element-gap: 18px;
+
+    --sidebar: #ffffff;
+    --sidebar-foreground: #111820;
+    --sidebar-primary: #30373f;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #ecefec;
+    --sidebar-accent-foreground: #111820;
+    --sidebar-border: #ecefec;
+    --sidebar-ring: #30373f;
   }
 
   * {
@@ -93,6 +195,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "ss01", "cv11";
   }
   html {
     @apply font-sans;

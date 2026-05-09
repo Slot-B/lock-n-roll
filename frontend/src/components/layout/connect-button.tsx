@@ -24,7 +24,7 @@ export function ConnectButton() {
         onClick={() => void disconnect()}
         title="Disconnect wallet"
       >
-        <span className="h-2 w-2 rounded-full bg-primary" aria-hidden />
+        <span className="h-2 w-2 rounded-full bg-brand-violet" aria-hidden />
         {shortAddress(publicKey.toBase58())}
         <LogOut className="h-3 w-3 opacity-70" />
       </Button>

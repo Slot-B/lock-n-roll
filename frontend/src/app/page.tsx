@@ -1,5 +1,492 @@
-import { redirect } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import type { ReactNode } from "react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  BadgeDollarSign,
+  Check,
+  LockKeyhole,
+  Plus,
+  RefreshCw,
+} from "lucide-react";
+
+import AntigravityField from "@/components/AntigravityField";
+import { ListingCard } from "@/components/domain/listing-card";
+import { MOCK_ACTIVE_LISTING_VIEWS } from "@/lib/mock";
+import { cn } from "@/lib/utils";
 
 export default function Home() {
-  redirect("/market");
+  const previewListings = MOCK_ACTIVE_LISTING_VIEWS.slice(0, 3);
+
+  return (
+    <div className="overflow-hidden bg-background">
+      {/* ──────────────────────────  HERO  ─────────────────────────── */}
+      {/* Mirrors ctrl.xyz "Take [logo]" treatment — logo glyph embedded
+          inline inside the headline, single CTA, clean canvas. */}
+      <section className="relative isolate overflow-hidden bg-background">
+        <AntigravityBackdrop className="top-[47%] z-0 opacity-100 mix-blend-multiply" />
+        <div className="relative z-10 mx-auto flex min-h-[calc(100svh-80px)] max-w-6xl flex-col items-center justify-center px-6 py-24 text-center md:py-32">
+          <Image
+            src="/brand/lock-n-roll-logo.png"
+            alt=""
+            width={148}
+            height={148}
+            priority
+            className="hero-logo-float mb-8 h-20 w-20 object-contain sm:h-24 sm:w-24"
+          />
+          <h1 className="font-display text-[5.25rem] font-extrabold uppercase leading-[0.82] text-primary sm:text-[7rem] md:text-[10rem] lg:text-[12.5rem]">
+            <span className="hero-word block" style={{ animationDelay: "80ms" }}>
+              Lock
+            </span>
+            <span
+              className="hero-word mt-2 flex items-center justify-center gap-[0.12em]"
+              style={{ animationDelay: "220ms" }}
+            >
+              <span className="hero-accent text-brand-violet" aria-label="N">
+                N
+              </span>
+              <span>Roll</span>
+            </span>
+          </h1>
+
+          <p className="hero-copy mt-10 max-w-2xl text-balance font-sans text-lg font-medium leading-relaxed text-muted-foreground sm:text-xl md:text-[22px] md:leading-[1.45]">
+            Trade locked vesting tokens — without unlocking them. Streamflow
+            keeps custody. Only the recipient right moves, atomically with
+            USDC.
+          </p>
+
+          <Link
+            href="/market"
+            className="group mt-12 inline-flex h-16 items-center justify-center gap-2 rounded-button-lg bg-primary px-10 text-base font-medium text-primary-foreground transition-all hover:bg-foreground active:translate-y-px"
+          >
+            Open Market
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
+        </div>
+      </section>
+
+      {/* ───────────────  VALUE PROP — single big claim  ─────────────── */}
+      <section className="mx-auto max-w-5xl px-6 pb-32 text-center md:pb-44">
+        <h2 className="font-display text-[clamp(40px,7vw,90px)] font-semibold leading-[0.95] tracking-[-0.03em] text-primary">
+          Every locked stream.
+          <br />
+          One protocol.
+        </h2>
+        <p className="mx-auto mt-7 max-w-xl text-balance text-base leading-relaxed text-muted-foreground md:text-lg">
+          Lock N Roll lists Streamflow vesting contracts as tradable
+          rights. The token never leaves the original stream — just the
+          recipient does.
+        </p>
+      </section>
+
+      {/* ─────────────  TRUST CARDS — 3 large pill cards  ─────────────── */}
+      <section className="mx-auto max-w-7xl px-6 pb-32 md:pb-44">
+        <div className="grid gap-5 md:grid-cols-3">
+          <FeatureCard
+            tone="ice"
+            kicker="01 / Custody"
+            title="Streamflow-native"
+            body="Locked tokens stay in the original vesting contract. No unwrap, no shadow stream, no wrapper token."
+          />
+          <FeatureCard
+            tone="violet"
+            kicker="02 / Settlement"
+            title="PDA settlement"
+            body="The listing PDA holds the recipient authority — never the underlying token. The program enforces atomic swaps."
+          />
+          <FeatureCard
+            tone="pebble"
+            kicker="03 / Bids"
+            title="Refundable bids"
+            body="Open bids stay withdrawable after a listing is sold or cancelled. No capital ever stuck in escrow."
+          />
+        </div>
+      </section>
+
+      {/* ────────────────────  SETTLEMENT PATH  ───────────────────── */}
+      <section className="bg-secondary">
+        <div className="mx-auto max-w-7xl px-6 py-32 text-center md:py-44">
+          <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            / Settlement path
+          </span>
+          <h2 className="mx-auto mt-4 max-w-4xl font-display text-[clamp(40px,7vw,90px)] font-semibold leading-[0.95] tracking-[-0.03em] text-primary">
+            The token stays locked.
+            <br />
+            The right changes hands.
+          </h2>
+          <p className="mx-auto mt-7 max-w-2xl text-balance text-base leading-relaxed text-muted-foreground md:text-lg">
+            Three steps, one Solana transaction. The stream contract never
+            knows it changed owners.
+          </p>
+
+          <div className="mt-16 grid gap-4 text-left md:grid-cols-3">
+            <StepCard
+              icon={<LockKeyhole className="h-5 w-5" />}
+              step="01"
+              title="List the stream"
+              text="The maker selects an eligible Streamflow Vesting contract and transfers recipient authority to the listing PDA."
+            />
+            <StepCard
+              icon={<RefreshCw className="h-5 w-5" />}
+              step="02"
+              title="Transfer the right"
+              text="Buy Now or Accept Bid moves the recipient right from the listing PDA straight to the buyer in a single instruction."
+            />
+            <StepCard
+              icon={<BadgeDollarSign className="h-5 w-5" />}
+              step="03"
+              title="Settle in USDC"
+              text="USDC pays the maker on the same path while losing bids remain refundable — no funds stuck in escrow."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ─────────────────────  SECURITY / TRUST  ──────────────────── */}
+      <section className="mx-auto max-w-7xl px-6 py-32 md:py-44">
+        <div className="grid items-center gap-16 md:grid-cols-2">
+          <div>
+            <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              / Trust model
+            </span>
+            <h2 className="mt-4 font-display text-[clamp(36px,6vw,72px)] font-semibold leading-[0.95] tracking-[-0.025em] text-primary">
+              The secure way<br />
+              to trade locked tokens.
+            </h2>
+            <p className="mt-7 max-w-md text-balance text-base leading-relaxed text-muted-foreground md:text-lg">
+              No custody, no approvals beyond Streamflow itself, no proprietary
+              wrapper. Every step is verifiable on-chain.
+            </p>
+          </div>
+          <ul className="flex flex-col gap-3">
+            <TrustBullet text="Streamflow Vesting recipient transfer — no token movement." />
+            <TrustBullet text="Atomic settlement — recipient and USDC swap in one tx." />
+            <TrustBullet text="Refundable bids — losing bids withdraw at any time." />
+            <TrustBullet text="No protocol custody — listings hold authority, not assets." />
+          </ul>
+        </div>
+      </section>
+
+      {/* ─────────────────────  MARKET PREVIEW  ───────────────────── */}
+      <section className="bg-secondary">
+        <div className="mx-auto max-w-7xl px-6 py-32 md:py-44">
+          <div className="text-center">
+            <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              / Market preview
+            </span>
+            <h2 className="mx-auto mt-4 max-w-3xl font-display text-[clamp(40px,7vw,90px)] font-semibold leading-[0.95] tracking-[-0.03em] text-primary">
+              Locked-token<br />
+              opportunities, live.
+            </h2>
+          </div>
+
+          <div className="mt-16 grid gap-4 md:grid-cols-3">
+            {previewListings.map((listing) => (
+              <ListingCard key={listing.listingPda} listing={listing} />
+            ))}
+          </div>
+
+          <div className="mt-12 flex justify-center">
+            <Link
+              href="/market"
+              className="group inline-flex h-14 items-center gap-2 rounded-button-lg border border-foreground bg-card px-8 text-sm font-medium text-foreground transition-colors hover:bg-foreground hover:text-background"
+            >
+              Open full market
+              <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ────────────────────────────  FAQ  ──────────────────────────── */}
+      <section className="mx-auto max-w-3xl px-6 py-32 md:py-44">
+        <div className="text-center">
+          <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            / FAQ
+          </span>
+          <h2 className="mt-4 font-display text-[clamp(36px,6vw,72px)] font-semibold leading-[0.95] tracking-[-0.025em] text-primary">
+            Common questions
+          </h2>
+        </div>
+
+        <div className="mt-14 flex flex-col gap-3">
+          <FaqItem question="How is custody handled?">
+            The Streamflow Vesting contract continues to hold the locked
+            tokens for its full duration. We only transfer the{" "}
+            <strong>recipient authority</strong> from the maker to the
+            listing PDA, then onward to the buyer at settlement.
+          </FaqItem>
+          <FaqItem question="What happens if my bid loses?">
+            Losing bids stay refundable. The listing program lets any
+            losing bidder pull their USDC back at any time after the
+            winner is chosen — there is no settlement window blocking
+            withdrawals.
+          </FaqItem>
+          <FaqItem question="Which tokens are eligible?">
+            Any SPL token streamed through a public Streamflow Vesting
+            program is eligible, provided the recipient role can be
+            transferred and the stream has not been cancelled.
+          </FaqItem>
+          <FaqItem question="What fees does the protocol charge?">
+            A flat protocol fee (currently 1%) is taken from the seller
+            side at settlement. Buyers pay only the listing price plus
+            standard Solana network fees.
+          </FaqItem>
+          <FaqItem question="How fast does settlement happen?">
+            Settlement is a single Solana transaction — typically under a
+            second. The recipient right and USDC move atomically; either
+            both transfer or neither does.
+          </FaqItem>
+        </div>
+      </section>
+
+      {/* ────────────────────────  FINAL CTA  ──────────────────────── */}
+      <section className="mx-auto max-w-7xl px-6 pb-32 md:pb-44">
+        <div className="relative overflow-hidden rounded-[44px] bg-brand-ice px-8 py-20 text-center md:px-16 md:py-28">
+          <div className="relative">
+            <h2 className="mx-auto max-w-3xl font-display text-[clamp(40px,7vw,90px)] font-semibold leading-[0.95] tracking-[-0.03em] text-primary">
+              Roll your locked stream.
+            </h2>
+            <p className="mx-auto mt-6 max-w-xl text-balance text-base leading-relaxed text-foreground/70 md:text-lg">
+              Connect a wallet, pick a vesting contract, list it in under a
+              minute. The recipient right transfers atomically.
+            </p>
+            <Link
+              href="/create"
+              className="group mt-10 inline-flex h-16 items-center justify-center gap-2 rounded-button-lg bg-primary px-10 text-base font-medium text-primary-foreground transition-all hover:bg-foreground active:translate-y-px"
+            >
+              Create Listing
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ─────────────────────────  FOOTER  ──────────────────────────── */}
+      <footer className="border-t border-border bg-background">
+        <div className="mx-auto grid max-w-7xl gap-12 px-6 py-16 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+          <div>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2.5 text-foreground"
+            >
+              <Image
+                src="/brand/lock-n-roll-logo.png"
+                alt="LOCK N ROLL"
+                width={36}
+                height={36}
+                className="h-9 w-9 rounded-full bg-card object-contain"
+              />
+              <span className="font-display text-base font-semibold uppercase tracking-tight">
+                Lock N Roll
+              </span>
+            </Link>
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
+              Streamflow-native OTC for locked vesting tokens on Solana.
+            </p>
+          </div>
+          <FooterCol
+            title="Product"
+            links={[
+              { href: "/market", label: "Market" },
+              { href: "/create", label: "Create listing" },
+              { href: "/dashboard", label: "Dashboard" },
+            ]}
+          />
+          <FooterCol
+            title="Resources"
+            links={[
+              { href: "https://streamflow.finance", label: "Streamflow", external: true },
+              { href: "/", label: "Docs" },
+              { href: "/", label: "FAQ" },
+            ]}
+          />
+          <FooterCol
+            title="Community"
+            links={[
+              { href: "/", label: "X / Twitter", external: true },
+              { href: "/", label: "Discord", external: true },
+              { href: "/", label: "GitHub", external: true },
+            ]}
+          />
+        </div>
+        <div className="border-t border-border">
+          <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-6 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between">
+            <span>© 2025 Lock N Roll. All rights reserved.</span>
+            <div className="flex gap-6">
+              <Link href="/" className="hover:text-foreground">Terms</Link>
+              <Link href="/" className="hover:text-foreground">Privacy</Link>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+// ─── Local primitives ─────────────────────────────────────────────────
+
+function AntigravityBackdrop({ className }: { className?: string }) {
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        "pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+        className,
+      )}
+    >
+      <div style={{ width: "1080px", height: "1080px", position: "relative" }}>
+        <AntigravityField
+          count={500}
+          magnetRadius={15}
+          ringRadius={13}
+          waveSpeed={0.4}
+          waveAmplitude={1.8}
+          particleSize={2.5}
+          lerpSpeed={0.14}
+          color="#eccdea"
+          autoAnimate
+          particleVariance={0.7}
+          rotationSpeed={0.1}
+          depthFactor={1}
+          pulseSpeed={3}
+          particleShape="box"
+          fieldStrength={10}
+        />
+      </div>
+    </div>
+  );
+}
+
+function FeatureCard({
+  tone,
+  kicker,
+  title,
+  body,
+}: {
+  tone: "ice" | "pebble" | "violet";
+  kicker: string;
+  title: string;
+  body: string;
+}) {
+  const toneStyles = {
+    ice: "bg-brand-ice text-foreground",
+    pebble: "bg-secondary text-foreground",
+    violet: "bg-brand-violet/25 text-foreground",
+  } as const;
+  return (
+    <div
+      className={cn(
+        "group/card flex h-full flex-col rounded-[36px] p-9 transition-transform duration-200 hover:-translate-y-1 md:p-11",
+        toneStyles[tone],
+      )}
+    >
+      <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-foreground/55">
+        {kicker}
+      </span>
+      <h3 className="mt-6 font-display text-3xl font-semibold leading-[1.05] tracking-tight md:text-4xl">
+        {title}
+      </h3>
+      <p className="mt-5 text-sm leading-relaxed text-foreground/75 md:text-base">
+        {body}
+      </p>
+    </div>
+  );
+}
+
+function StepCard({
+  icon,
+  step,
+  title,
+  text,
+}: {
+  icon: ReactNode;
+  step: string;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="group/step flex h-full flex-col rounded-[28px] bg-card p-8 transition-colors hover:bg-background md:p-9">
+      <div className="flex items-center justify-between">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-ice text-brand-charcoal transition-colors group-hover/step:bg-brand-violet group-hover/step:text-white">
+          {icon}
+        </div>
+        <span className="font-mono text-sm text-muted-foreground">{step}</span>
+      </div>
+      <h3 className="mt-8 font-display text-2xl font-semibold leading-tight tracking-tight text-foreground">
+        {title}
+      </h3>
+      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+        {text}
+      </p>
+    </div>
+  );
+}
+
+function TrustBullet({ text }: { text: string }) {
+  return (
+    <li className="flex items-start gap-4 rounded-[24px] bg-card p-5 md:p-6">
+      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-foreground text-background">
+        <Check className="h-3.5 w-3.5" strokeWidth={3} />
+      </span>
+      <span className="text-base leading-snug text-foreground md:text-lg">
+        {text}
+      </span>
+    </li>
+  );
+}
+
+function FaqItem({
+  question,
+  children,
+}: {
+  question: string;
+  children: ReactNode;
+}) {
+  return (
+    <details className="group/faq rounded-[28px] bg-secondary px-6 py-5 transition-colors open:bg-card md:px-8 md:py-6 [&_summary]:list-none [&_summary::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer items-center justify-between gap-6 text-left">
+        <span className="font-display text-lg font-medium leading-snug tracking-tight text-foreground md:text-xl">
+          {question}
+        </span>
+        <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-foreground/15 bg-card transition-colors group-open/faq:border-brand-violet group-open/faq:bg-brand-violet group-open/faq:text-white">
+          <Plus className="h-4 w-4 transition-transform duration-200 group-open/faq:rotate-45" />
+        </span>
+      </summary>
+      <div className="mt-4 max-w-2xl text-sm leading-relaxed text-foreground/75 md:text-base">
+        {children}
+      </div>
+    </details>
+  );
+}
+
+function FooterCol({
+  title,
+  links,
+}: {
+  title: string;
+  links: { href: string; label: string; external?: boolean }[];
+}) {
+  return (
+    <div>
+      <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+        {title}
+      </span>
+      <ul className="mt-5 flex flex-col gap-3">
+        {links.map((link) => (
+          <li key={`${title}-${link.label}`}>
+            <Link
+              href={link.href}
+              target={link.external ? "_blank" : undefined}
+              rel={link.external ? "noreferrer" : undefined}
+              className="text-sm text-foreground/80 transition-colors hover:text-foreground"
+            >
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }

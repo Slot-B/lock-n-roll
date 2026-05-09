@@ -18,8 +18,8 @@ const NETWORKS: ReadonlyArray<{
   /** Tailwind text-color class for the dot + label, signals environment. */
   tone: string;
 }> = [
-  { value: "devnet", label: "Devnet", tone: "text-amber-400" },
-  { value: "mainnet", label: "Mainnet", tone: "text-primary" },
+  { value: "devnet", label: "Devnet", tone: "text-brand-violet" },
+  { value: "mainnet", label: "Mainnet", tone: "text-brand-blue" },
 ];
 
 export function NetworkToggle() {

@@ -20,7 +20,6 @@ export default function RootLayout({
     <html
       lang="en"
       className={cn(
-        "dark",
         fontDisplay.variable,
         fontSans.variable,
         fontMono.variable,

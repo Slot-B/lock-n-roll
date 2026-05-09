@@ -66,7 +66,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
         <WalletProvider wallets={wallets} autoConnect>
           <WalletModalProvider>
             {children}
-            <Toaster richColors theme="dark" position="top-right" />
+            <Toaster richColors theme="light" position="top-right" />
           </WalletModalProvider>
         </WalletProvider>
       </ConnectionProvider>
