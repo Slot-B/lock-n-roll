@@ -9,7 +9,7 @@ program = "58cA8UATTBpWDcv4HgddYVy1TLhKXs2EWYSqEbzR5pnp"
 spike = "5uhAfkGs2J3TpoFsPCsyaB1krn29nWCQHvSWArhFdDkz"
 
 [programs.devnet]
-program = "9PR9oNvarS2iektAP84Zdcs4akh3a2NML8XVw75ih4gu"
+program = "58cA8UATTBpWDcv4HgddYVy1TLhKXs2EWYSqEbzR5pnp"
 spike = "5uhAfkGs2J3TpoFsPCsyaB1krn29nWCQHvSWArhFdDkz"
 
 [test.validator]
