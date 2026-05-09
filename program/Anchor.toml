@@ -5,10 +5,36 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-program = "7Q54xcKeDKLzFSymQpa6WxyFcyQGo5ebvaUbrGkKVZBc"
+program = "58cA8UATTBpWDcv4HgddYVy1TLhKXs2EWYSqEbzR5pnp"
+spike = "5uhAfkGs2J3TpoFsPCsyaB1krn29nWCQHvSWArhFdDkz"
 
 [programs.devnet]
 program = "9PR9oNvarS2iektAP84Zdcs4akh3a2NML8XVw75ih4gu"
+spike = "5uhAfkGs2J3TpoFsPCsyaB1krn29nWCQHvSWArhFdDkz"
+
+[test.validator]
+url = "https://api.devnet.solana.com"
+bind_address = "127.0.0.1"
+
+# Streamflow main program
+[[test.validator.clone]]
+address = "HqDGZjaVRXJ9MGRQEw7qDc2rAr6iH1n1kAQdCZaCMfMZ"
+
+# Partner Oracle program (fee 조회용)
+[[test.validator.clone]]
+address = "pardpVtPjC8nLj1Dwncew62mUzfChdCX1EaoZe8oCAa"
+
+# Partner registry PDA (PDA = [b"strm_fees"] in pardpV...)
+[[test.validator.clone]]
+address = "B743wFVk2pCYhV91cn287e1xY7f1vt4gdY48hhNiuQmT"
+
+# Streamflow Treasury wallet
+[[test.validator.clone]]
+address = "5SEpbdjFK5FxwTvfsGMXVQTD2v4M2c5tyRTxhdsPkgDw"
+
+# Default partner (Withdrawor)
+[[test.validator.clone]]
+address = "wdrwhnCv4pzW8beKsbPa4S2UDZrXenjg16KJdKSpb5u"
 
 [registry]
 url = "https://api.apr.dev"
@@ -18,4 +44,4 @@ cluster = "Localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/spike.ts"

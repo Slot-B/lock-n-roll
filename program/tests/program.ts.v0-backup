@@ -1,0 +1,792 @@
+import * as anchor from "@coral-xyz/anchor";
+import { Program } from "@coral-xyz/anchor";
+import { LockNRoll } from "../target/types/lock_n_roll";
+import {
+  createMint,
+  createAccount,
+  mintTo,
+  getAccount,
+  TOKEN_PROGRAM_ID,
+  TOKEN_2022_PROGRAM_ID,
+} from "@solana/spl-token";
+import { assert, expect } from "chai";
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+describe("lock-n-roll OTC", () => {
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
+  const program = anchor.workspace.LockNRoll as Program<LockNRoll>;
+
+  const maker = (provider.wallet as anchor.Wallet).payer;
+  const taker = anchor.web3.Keypair.generate();
+  const taker2 = anchor.web3.Keypair.generate();
+  const feeRecipient = anchor.web3.Keypair.generate();
+
+  const FEE_BPS = 50; // 0.5%
+  const MAX_DISCOUNT_BPS = 5000; // 50%
+  const MAX_ORACLE_AGE_SEC = new anchor.BN(300);
+  const ZERO_FEED_ID = Array(32).fill(0); // 검증 스킵용
+
+  let lockMint: anchor.web3.PublicKey;
+  let usdcMint: anchor.web3.PublicKey;
+
+  let makerLockAcc: anchor.web3.PublicKey;
+  let makerUsdcAcc: anchor.web3.PublicKey;
+  let takerLockAcc: anchor.web3.PublicKey;
+  let takerUsdcAcc: anchor.web3.PublicKey;
+  let taker2UsdcAcc: anchor.web3.PublicKey;
+  let feeRecipientUsdcAcc: anchor.web3.PublicKey;
+
+  let configPda: anchor.web3.PublicKey;
+
+  const MAKER_AMOUNT = new anchor.BN(10_000_000_000); // 10,000 토큰 (decimals=6)
+  const TAKER_AMOUNT = new anchor.BN(8_000_000_000); //  8,000 USDC
+
+  const orderPdas = (
+    orderMaker: anchor.web3.PublicKey,
+    orderId: anchor.BN
+  ) => {
+    const [escrowOrder] = anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("order"),
+        orderMaker.toBuffer(),
+        orderId.toArrayLike(Buffer, "le", 8),
+      ],
+      program.programId
+    );
+    const [escrowVault] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("vault"), escrowOrder.toBuffer()],
+      program.programId
+    );
+    return { escrowOrder, escrowVault };
+  };
+
+  const ceilFee = (amount: anchor.BN): anchor.BN =>
+    amount.muln(FEE_BPS).addn(9999).divn(10000);
+
+  const createOrder = async (
+    orderId: anchor.BN,
+    unlockAt: anchor.BN,
+    expiresAt: anchor.BN
+  ) => {
+    const { escrowOrder, escrowVault } = orderPdas(maker.publicKey, orderId);
+    await program.methods
+      .createOrder(
+        MAKER_AMOUNT,
+        TAKER_AMOUNT,
+        orderId,
+        unlockAt,
+        expiresAt,
+        ZERO_FEED_ID
+      )
+      .accounts({
+        maker: maker.publicKey,
+        makerTokenMint: lockMint,
+        usdcMint,
+        escrowOrder,
+        makerTokenAccount: makerLockAcc,
+        escrowVault,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+        config: configPda,
+        priceUpdate: null,
+      } as any)
+      .rpc();
+    return { escrowOrder, escrowVault };
+  };
+
+  before(async () => {
+    for (const kp of [taker, taker2]) {
+      const sig = await provider.connection.requestAirdrop(
+        kp.publicKey,
+        2 * anchor.web3.LAMPORTS_PER_SOL
+      );
+      await provider.connection.confirmTransaction(sig);
+    }
+
+    lockMint = await createMint(
+      provider.connection,
+      maker,
+      maker.publicKey,
+      null,
+      6
+    );
+    usdcMint = await createMint(
+      provider.connection,
+      maker,
+      maker.publicKey,
+      null,
+      6
+    );
+
+    makerLockAcc = await createAccount(
+      provider.connection,
+      maker,
+      lockMint,
+      maker.publicKey
+    );
+    makerUsdcAcc = await createAccount(
+      provider.connection,
+      maker,
+      usdcMint,
+      maker.publicKey
+    );
+    takerLockAcc = await createAccount(
+      provider.connection,
+      taker,
+      lockMint,
+      taker.publicKey
+    );
+    takerUsdcAcc = await createAccount(
+      provider.connection,
+      taker,
+      usdcMint,
+      taker.publicKey
+    );
+    taker2UsdcAcc = await createAccount(
+      provider.connection,
+      taker2,
+      usdcMint,
+      taker2.publicKey
+    );
+    feeRecipientUsdcAcc = await createAccount(
+      provider.connection,
+      maker,
+      usdcMint,
+      feeRecipient.publicKey
+    );
+
+    await mintTo(
+      provider.connection,
+      maker,
+      lockMint,
+      makerLockAcc,
+      maker,
+      1_000_000_000_000
+    );
+    await mintTo(
+      provider.connection,
+      maker,
+      usdcMint,
+      takerUsdcAcc,
+      maker,
+      100_000_000_000
+    );
+    await mintTo(
+      provider.connection,
+      maker,
+      usdcMint,
+      taker2UsdcAcc,
+      maker,
+      100_000_000_000
+    );
+
+    [configPda] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("config")],
+      program.programId
+    );
+
+    await program.methods
+      .initConfig(
+        FEE_BPS,
+        feeRecipient.publicKey,
+        MAX_DISCOUNT_BPS,
+        MAX_ORACLE_AGE_SEC
+      )
+      .accounts({
+        authority: maker.publicKey,
+        config: configPda,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      } as any)
+      .rpc();
+  });
+
+  it("InitConfig: 수수료·할인 한도·오라클 max age 설정", async () => {
+    const cfg = await program.account.config.fetch(configPda);
+    assert.equal(cfg.authority.toBase58(), maker.publicKey.toBase58());
+    assert.equal(cfg.feeRecipient.toBase58(), feeRecipient.publicKey.toBase58());
+    assert.equal(cfg.feeBps, FEE_BPS);
+    assert.equal(cfg.maxDiscountBps, MAX_DISCOUNT_BPS);
+    assert.equal(cfg.maxOracleAgeSec.toString(), MAX_ORACLE_AGE_SEC.toString());
+  });
+
+  it("CreateOrder: 락업 토큰 예치 + 견적 등록", async () => {
+    const orderId = new anchor.BN(1);
+    const now = Math.floor(Date.now() / 1000);
+    const unlockAt = new anchor.BN(now + 60);
+    const { escrowOrder, escrowVault } = await createOrder(
+      orderId,
+      unlockAt,
+      new anchor.BN(0)
+    );
+
+    const orderAcc = await program.account.escrowOrder.fetch(escrowOrder);
+    assert.equal(orderAcc.maker.toBase58(), maker.publicKey.toBase58());
+    assert.equal(
+      orderAcc.currentOwner.toBase58(),
+      maker.publicKey.toBase58()
+    );
+    assert.equal(orderAcc.makerAmount.toString(), MAKER_AMOUNT.toString());
+    assert.deepEqual(orderAcc.state, { listed: {} });
+
+    const vault = await getAccount(provider.connection, escrowVault);
+    assert.equal(vault.amount.toString(), MAKER_AMOUNT.toString());
+  });
+
+  it("TakeOrder: USDC = taker_amount, 추가로 fee가 fee_recipient로 분리", async () => {
+    const orderId = new anchor.BN(2);
+    const now = Math.floor(Date.now() / 1000);
+    const unlockAt = new anchor.BN(now + 60);
+    const { escrowOrder } = await createOrder(
+      orderId,
+      unlockAt,
+      new anchor.BN(0)
+    );
+
+    const expectedFee = ceilFee(TAKER_AMOUNT);
+    const sellerBefore = await getAccount(provider.connection, makerUsdcAcc);
+    const takerBefore = await getAccount(provider.connection, takerUsdcAcc);
+    const feeBefore = await getAccount(
+      provider.connection,
+      feeRecipientUsdcAcc
+    );
+
+    await program.methods
+      .takeOrder()
+      .accounts({
+        taker: taker.publicKey,
+        escrowOrder,
+        config: configPda,
+        usdcMint,
+        takerUsdcAccount: takerUsdcAcc,
+        sellerUsdcAccount: makerUsdcAcc,
+        feeRecipientUsdcAccount: feeRecipientUsdcAcc,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      } as any)
+      .signers([taker])
+      .rpc();
+
+    const orderAcc = await program.account.escrowOrder.fetch(escrowOrder);
+    assert.equal(
+      orderAcc.currentOwner.toBase58(),
+      taker.publicKey.toBase58()
+    );
+    assert.deepEqual(orderAcc.state, { owned: {} });
+
+    const sellerAfter = await getAccount(provider.connection, makerUsdcAcc);
+    const takerAfter = await getAccount(provider.connection, takerUsdcAcc);
+    const feeAfter = await getAccount(
+      provider.connection,
+      feeRecipientUsdcAcc
+    );
+
+    const sellerDelta =
+      BigInt(sellerAfter.amount.toString()) -
+      BigInt(sellerBefore.amount.toString());
+    const takerDelta =
+      BigInt(takerBefore.amount.toString()) -
+      BigInt(takerAfter.amount.toString());
+    const feeDelta =
+      BigInt(feeAfter.amount.toString()) - BigInt(feeBefore.amount.toString());
+
+    assert.equal(sellerDelta.toString(), TAKER_AMOUNT.toString());
+    assert.equal(feeDelta.toString(), expectedFee.toString());
+    assert.equal(
+      takerDelta.toString(),
+      TAKER_AMOUNT.add(expectedFee).toString()
+    );
+  });
+
+  it("Claim: unlock_at 이후 owner가 토큰 인출", async () => {
+    const orderId = new anchor.BN(3);
+    const now = Math.floor(Date.now() / 1000);
+    const unlockAt = new anchor.BN(now + 4);
+    const { escrowOrder, escrowVault } = await createOrder(
+      orderId,
+      unlockAt,
+      new anchor.BN(0)
+    );
+
+    await program.methods
+      .takeOrder()
+      .accounts({
+        taker: taker.publicKey,
+        escrowOrder,
+        config: configPda,
+        usdcMint,
+        takerUsdcAccount: takerUsdcAcc,
+        sellerUsdcAccount: makerUsdcAcc,
+        feeRecipientUsdcAccount: feeRecipientUsdcAcc,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      } as any)
+      .signers([taker])
+      .rpc();
+
+    await sleep(6000);
+
+    const before = await getAccount(provider.connection, takerLockAcc);
+    await program.methods
+      .claim()
+      .accounts({
+        owner: taker.publicKey,
+        maker: maker.publicKey,
+        escrowOrder,
+        escrowVault,
+        makerTokenMint: lockMint,
+        ownerTokenAccount: takerLockAcc,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      } as any)
+      .signers([taker])
+      .rpc();
+
+    const after = await getAccount(provider.connection, takerLockAcc);
+    const delta =
+      BigInt(after.amount.toString()) - BigInt(before.amount.toString());
+    assert.equal(delta.toString(), MAKER_AMOUNT.toString());
+
+    assert.isNull(await provider.connection.getAccountInfo(escrowOrder));
+    assert.isNull(await provider.connection.getAccountInfo(escrowVault));
+  });
+
+  it("Cancel: Listed 상태에서 owner(=maker)가 회수", async () => {
+    const orderId = new anchor.BN(4);
+    const now = Math.floor(Date.now() / 1000);
+    const unlockAt = new anchor.BN(now + 600);
+    const { escrowOrder, escrowVault } = await createOrder(
+      orderId,
+      unlockAt,
+      new anchor.BN(0)
+    );
+
+    const before = await getAccount(provider.connection, makerLockAcc);
+    await program.methods
+      .cancelOrder()
+      .accounts({
+        owner: maker.publicKey,
+        maker: maker.publicKey,
+        escrowOrder,
+        escrowVault,
+        makerTokenMint: lockMint,
+        ownerTokenAccount: makerLockAcc,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      } as any)
+      .rpc();
+
+    const after = await getAccount(provider.connection, makerLockAcc);
+    assert.equal(
+      (
+        BigInt(after.amount.toString()) - BigInt(before.amount.toString())
+      ).toString(),
+      MAKER_AMOUNT.toString()
+    );
+    assert.isNull(await provider.connection.getAccountInfo(escrowOrder));
+  });
+
+  it("TakeOrderPartial: vault → 신규 vault 분할 + fee 분리, sub-order maker = taker", async () => {
+    const orderId = new anchor.BN(100);
+    const subOrderId = new anchor.BN(101);
+    const now = Math.floor(Date.now() / 1000);
+    const unlockAt = new anchor.BN(now + 60);
+    const { escrowOrder: originalOrder, escrowVault: originalVault } =
+      await createOrder(orderId, unlockAt, new anchor.BN(0));
+
+    const { escrowOrder: newOrder, escrowVault: newVault } = orderPdas(
+      taker.publicKey,
+      subOrderId
+    );
+
+    const FILL = new anchor.BN(3_000_000_000);
+    const expectedUsdc = FILL.mul(TAKER_AMOUNT)
+      .add(MAKER_AMOUNT.subn(1))
+      .div(MAKER_AMOUNT);
+    const expectedFee = ceilFee(expectedUsdc);
+
+    const sellerBefore = await getAccount(provider.connection, makerUsdcAcc);
+    const feeBefore = await getAccount(
+      provider.connection,
+      feeRecipientUsdcAcc
+    );
+
+    await program.methods
+      .takeOrderPartial(FILL, subOrderId)
+      .accounts({
+        taker: taker.publicKey,
+        originalOrder,
+        originalVault,
+        makerTokenMint: lockMint,
+        usdcMint,
+        config: configPda,
+        newOrder,
+        newVault,
+        takerUsdcAccount: takerUsdcAcc,
+        sellerUsdcAccount: makerUsdcAcc,
+        feeRecipientUsdcAccount: feeRecipientUsdcAcc,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+      } as any)
+      .signers([taker])
+      .rpc();
+
+    const subAcc = await program.account.escrowOrder.fetch(newOrder);
+    assert.equal(subAcc.maker.toBase58(), taker.publicKey.toBase58());
+    assert.equal(subAcc.currentOwner.toBase58(), taker.publicKey.toBase58());
+    assert.equal(subAcc.makerAmount.toString(), FILL.toString());
+    assert.deepEqual(subAcc.state, { owned: {} });
+
+    const subVault = await getAccount(provider.connection, newVault);
+    assert.equal(subVault.amount.toString(), FILL.toString());
+
+    const sellerAfter = await getAccount(provider.connection, makerUsdcAcc);
+    const feeAfter = await getAccount(
+      provider.connection,
+      feeRecipientUsdcAcc
+    );
+    assert.equal(
+      (
+        BigInt(sellerAfter.amount.toString()) -
+        BigInt(sellerBefore.amount.toString())
+      ).toString(),
+      expectedUsdc.toString()
+    );
+    assert.equal(
+      (
+        BigInt(feeAfter.amount.toString()) -
+        BigInt(feeBefore.amount.toString())
+      ).toString(),
+      expectedFee.toString()
+    );
+  });
+
+  it("Relist: Owned 보유자가 가격 조정 후 재매도 → Listed", async () => {
+    // 1. order 생성 + take
+    const orderId = new anchor.BN(500);
+    const now = Math.floor(Date.now() / 1000);
+    const unlockAt = new anchor.BN(now + 600);
+    const { escrowOrder } = await createOrder(
+      orderId,
+      unlockAt,
+      new anchor.BN(0)
+    );
+
+    await program.methods
+      .takeOrder()
+      .accounts({
+        taker: taker.publicKey,
+        escrowOrder,
+        config: configPda,
+        usdcMint,
+        takerUsdcAccount: takerUsdcAcc,
+        sellerUsdcAccount: makerUsdcAcc,
+        feeRecipientUsdcAccount: feeRecipientUsdcAcc,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      } as any)
+      .signers([taker])
+      .rpc();
+
+    // 2. taker가 새 가격으로 relist
+    const NEW_PRICE = new anchor.BN(9_000_000_000); // 9000 USDC
+    await program.methods
+      .relist(NEW_PRICE, new anchor.BN(0))
+      .accounts({
+        owner: taker.publicKey,
+        escrowOrder,
+      } as any)
+      .signers([taker])
+      .rpc();
+
+    const acc = await program.account.escrowOrder.fetch(escrowOrder);
+    assert.equal(acc.takerAmount.toString(), NEW_PRICE.toString());
+    assert.deepEqual(acc.state, { listed: {} });
+    assert.equal(acc.currentOwner.toBase58(), taker.publicKey.toBase58());
+
+    // 3. taker2가 take → USDC는 taker(=current_owner)에게 가야 함
+    const takerUsdcBefore = await getAccount(
+      provider.connection,
+      takerUsdcAcc
+    );
+
+    await program.methods
+      .takeOrder()
+      .accounts({
+        taker: taker2.publicKey,
+        escrowOrder,
+        config: configPda,
+        usdcMint,
+        takerUsdcAccount: taker2UsdcAcc,
+        sellerUsdcAccount: takerUsdcAcc, // ← seller는 이제 taker
+        feeRecipientUsdcAccount: feeRecipientUsdcAcc,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      } as any)
+      .signers([taker2])
+      .rpc();
+
+    const takerUsdcAfter = await getAccount(
+      provider.connection,
+      takerUsdcAcc
+    );
+    const sellerDelta =
+      BigInt(takerUsdcAfter.amount.toString()) -
+      BigInt(takerUsdcBefore.amount.toString());
+    assert.equal(sellerDelta.toString(), NEW_PRICE.toString());
+
+    const acc2 = await program.account.escrowOrder.fetch(escrowOrder);
+    assert.equal(acc2.currentOwner.toBase58(), taker2.publicKey.toBase58());
+    assert.deepEqual(acc2.state, { owned: {} });
+  });
+
+  it("revert: Listed 상태에서 relist 시 NotOwned", async () => {
+    const orderId = new anchor.BN(600);
+    const now = Math.floor(Date.now() / 1000);
+    const unlockAt = new anchor.BN(now + 60);
+    const { escrowOrder } = await createOrder(
+      orderId,
+      unlockAt,
+      new anchor.BN(0)
+    );
+
+    try {
+      await program.methods
+        .relist(new anchor.BN(1_000_000), new anchor.BN(0))
+        .accounts({ owner: maker.publicKey, escrowOrder } as any)
+        .rpc();
+      assert.fail("NotOwned 에러가 발생해야 함");
+    } catch (e: any) {
+      expect(e.toString()).to.include("NotOwned");
+    }
+  });
+
+  it("revert: 같은 mint로 maker_token / usdc 지정 시 SameMint", async () => {
+    const orderId = new anchor.BN(700);
+    const now = Math.floor(Date.now() / 1000);
+    const unlockAt = new anchor.BN(now + 60);
+    const { escrowOrder, escrowVault } = orderPdas(maker.publicKey, orderId);
+
+    try {
+      await program.methods
+        .createOrder(
+          MAKER_AMOUNT,
+          TAKER_AMOUNT,
+          orderId,
+          unlockAt,
+          new anchor.BN(0),
+          ZERO_FEED_ID
+        )
+        .accounts({
+          maker: maker.publicKey,
+          makerTokenMint: lockMint,
+          usdcMint: lockMint,
+          escrowOrder,
+          makerTokenAccount: makerLockAcc,
+          escrowVault,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+          config: configPda,
+          priceUpdate: null,
+        } as any)
+        .rpc();
+      assert.fail("SameMint 에러");
+    } catch (e: any) {
+      expect(e.toString()).to.include("SameMint");
+    }
+  });
+
+  it("revert: 잔량보다 큰 fill_amount 시 InsufficientLiquidity", async () => {
+    const orderId = new anchor.BN(800);
+    const subId = new anchor.BN(801);
+    const now = Math.floor(Date.now() / 1000);
+    const unlockAt = new anchor.BN(now + 60);
+    const { escrowOrder: originalOrder, escrowVault: originalVault } =
+      await createOrder(orderId, unlockAt, new anchor.BN(0));
+    const { escrowOrder: newOrder, escrowVault: newVault } = orderPdas(
+      taker.publicKey,
+      subId
+    );
+
+    try {
+      await program.methods
+        .takeOrderPartial(MAKER_AMOUNT.addn(1), subId)
+        .accounts({
+          taker: taker.publicKey,
+          originalOrder,
+          originalVault,
+          makerTokenMint: lockMint,
+          usdcMint,
+          config: configPda,
+          newOrder,
+          newVault,
+          takerUsdcAccount: takerUsdcAcc,
+          sellerUsdcAccount: makerUsdcAcc,
+          feeRecipientUsdcAccount: feeRecipientUsdcAcc,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+        } as any)
+        .signers([taker])
+        .rpc();
+      assert.fail("InsufficientLiquidity 에러");
+    } catch (e: any) {
+      expect(e.toString()).to.include("InsufficientLiquidity");
+    }
+  });
+
+  it("Token-2022: Token-2022 락업 mint로도 create_order/take_order 가능", async () => {
+    // Token-2022 mint 생성 (vanilla, no extensions)
+    const t22Mint = await createMint(
+      provider.connection,
+      maker,
+      maker.publicKey,
+      null,
+      6,
+      undefined,
+      undefined,
+      TOKEN_2022_PROGRAM_ID
+    );
+    const makerT22 = await createAccount(
+      provider.connection,
+      maker,
+      t22Mint,
+      maker.publicKey,
+      undefined,
+      undefined,
+      TOKEN_2022_PROGRAM_ID
+    );
+    await mintTo(
+      provider.connection,
+      maker,
+      t22Mint,
+      makerT22,
+      maker,
+      100_000_000_000,
+      [],
+      undefined,
+      TOKEN_2022_PROGRAM_ID
+    );
+
+    const orderId = new anchor.BN(1000);
+    const now = Math.floor(Date.now() / 1000);
+    const unlockAt = new anchor.BN(now + 60);
+    const { escrowOrder, escrowVault } = orderPdas(maker.publicKey, orderId);
+
+    await program.methods
+      .createOrder(
+        MAKER_AMOUNT,
+        TAKER_AMOUNT,
+        orderId,
+        unlockAt,
+        new anchor.BN(0),
+        ZERO_FEED_ID
+      )
+      .accounts({
+        maker: maker.publicKey,
+        makerTokenMint: t22Mint,
+        usdcMint,
+        escrowOrder,
+        makerTokenAccount: makerT22,
+        escrowVault,
+        tokenProgram: TOKEN_2022_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+        config: configPda,
+        priceUpdate: null,
+      } as any)
+      .rpc();
+
+    const orderAcc = await program.account.escrowOrder.fetch(escrowOrder);
+    assert.equal(orderAcc.makerTokenMint.toBase58(), t22Mint.toBase58());
+
+    const vault = await getAccount(
+      provider.connection,
+      escrowVault,
+      undefined,
+      TOKEN_2022_PROGRAM_ID
+    );
+    assert.equal(vault.amount.toString(), MAKER_AMOUNT.toString());
+  });
+
+  it("revert: oracle_feed_id 지정했는데 price_update 없으면 OracleAccountMissing", async () => {
+    const orderId = new anchor.BN(1100);
+    const now = Math.floor(Date.now() / 1000);
+    const unlockAt = new anchor.BN(now + 60);
+    const { escrowOrder, escrowVault } = orderPdas(maker.publicKey, orderId);
+
+    const fakeFeed = Array(32).fill(1); // non-zero
+
+    try {
+      await program.methods
+        .createOrder(
+          MAKER_AMOUNT,
+          TAKER_AMOUNT,
+          orderId,
+          unlockAt,
+          new anchor.BN(0),
+          fakeFeed
+        )
+        .accounts({
+          maker: maker.publicKey,
+          makerTokenMint: lockMint,
+          usdcMint,
+          escrowOrder,
+          makerTokenAccount: makerLockAcc,
+          escrowVault,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+          config: configPda,
+          priceUpdate: null,
+        } as any)
+        .rpc();
+      assert.fail("OracleAccountMissing 에러가 발생해야 함");
+    } catch (e: any) {
+      expect(e.toString()).to.include("OracleAccountMissing");
+    }
+  });
+
+  it("revert: 락업 풀리기 전 claim 시 StillLocked", async () => {
+    const orderId = new anchor.BN(900);
+    const now = Math.floor(Date.now() / 1000);
+    const unlockAt = new anchor.BN(now + 600);
+    const { escrowOrder, escrowVault } = await createOrder(
+      orderId,
+      unlockAt,
+      new anchor.BN(0)
+    );
+
+    await program.methods
+      .takeOrder()
+      .accounts({
+        taker: taker.publicKey,
+        escrowOrder,
+        config: configPda,
+        usdcMint,
+        takerUsdcAccount: takerUsdcAcc,
+        sellerUsdcAccount: makerUsdcAcc,
+        feeRecipientUsdcAccount: feeRecipientUsdcAcc,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      } as any)
+      .signers([taker])
+      .rpc();
+
+    try {
+      await program.methods
+        .claim()
+        .accounts({
+          owner: taker.publicKey,
+          maker: maker.publicKey,
+          escrowOrder,
+          escrowVault,
+          makerTokenMint: lockMint,
+          ownerTokenAccount: takerLockAcc,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        } as any)
+        .signers([taker])
+        .rpc();
+      assert.fail("StillLocked 에러");
+    } catch (e: any) {
+      expect(e.toString()).to.include("StillLocked");
+    }
+  });
+});

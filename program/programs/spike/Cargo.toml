@@ -1,23 +1,20 @@
 [package]
-name = "program"
+name = "spike"
 version = "0.1.0"
-description = "Lock-n-Roll OTC Market"
+description = "Streamflow CPI PDA-signer spike for LOCK N ROLL B0"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "lock_n_roll"
+name = "spike"
 
 [features]
 no-entrypoint = []
 no-idl = []
 no-log-ix-name = []
 cpi = ["no-entrypoint"]
-default = ["devnet"]
-devnet = []
-mainnet = []
+default = []
 idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
-
 
 [dependencies]
 anchor-lang = "0.31.1"
