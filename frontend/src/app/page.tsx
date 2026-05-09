@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import GridMotionField from "@/components/GridMotionField";
+import HyperspeedField from "@/components/HyperspeedField";
 import Shuffle from "@/components/Shuffle";
 import { ListingCard } from "@/components/domain/listing-card";
 import { MOCK_ACTIVE_LISTING_VIEWS } from "@/lib/mock";
@@ -21,7 +22,7 @@ export default function Home() {
   const previewListings = MOCK_ACTIVE_LISTING_VIEWS.slice(0, 3);
 
   return (
-    <div className="overflow-hidden bg-background">
+    <div className="overflow-hidden bg-black">
       {/* ──────────────────────────  HERO  ─────────────────────────── */}
       {/* Mirrors ctrl.xyz "Take [logo]" treatment — logo glyph embedded
           inline inside the headline, single CTA, clean canvas. */}
@@ -201,8 +202,15 @@ export default function Home() {
       </section>
 
       {/* ────────────────────  SETTLEMENT PATH  ───────────────────── */}
-      <section className="bg-secondary">
-        <div className="mx-auto max-w-7xl px-6 py-32 text-center md:py-44">
+      <section className="relative isolate overflow-hidden bg-black">
+        {/* Hyperspeed cyberpunk tunnel — full-bleed, behind content */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-0 opacity-90"
+        >
+          <HyperspeedField preset="one" />
+        </div>
+        <div className="relative z-10 mx-auto max-w-7xl px-6 py-32 text-center md:py-44">
           <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
             / Settlement path
           </span>
@@ -246,9 +254,45 @@ export default function Home() {
             <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
               / Trust model
             </span>
-            <h2 className="mt-4 font-display text-[clamp(36px,6vw,72px)] font-semibold leading-[0.95] tracking-normal text-primary">
-              The secure way<br />
-              to trade locked tokens.
+            <h2 className="mt-4 font-display font-semibold tracking-normal text-primary">
+              <Shuffle
+                text="The secure way"
+                tag="span"
+                shuffleDirection="right"
+                duration={0.5}
+                shuffleTimes={2}
+                animationMode="evenodd"
+                stagger={0.04}
+                triggerOnce
+                triggerOnHover
+                textAlign="left"
+                className="font-display font-semibold tracking-normal text-primary"
+                style={{
+                  display: "block",
+                  fontSize: "clamp(36px, 6vw, 72px)",
+                  lineHeight: 0.95,
+                  textTransform: "uppercase",
+                }}
+              />
+              <Shuffle
+                text="to trade locked tokens."
+                tag="span"
+                shuffleDirection="right"
+                duration={0.5}
+                shuffleTimes={2}
+                animationMode="evenodd"
+                stagger={0.04}
+                triggerOnce
+                triggerOnHover
+                textAlign="left"
+                className="font-display font-semibold tracking-normal text-primary"
+                style={{
+                  display: "block",
+                  fontSize: "clamp(36px, 6vw, 72px)",
+                  lineHeight: 0.95,
+                  textTransform: "uppercase",
+                }}
+              />
             </h2>
             <p className="mt-7 max-w-md text-balance font-display text-base font-normal uppercase leading-relaxed text-muted-foreground md:text-lg">
               No custody, no approvals beyond Streamflow itself, no proprietary
@@ -265,7 +309,7 @@ export default function Home() {
       </section>
 
       {/* ─────────────────────  MARKET PREVIEW  ───────────────────── */}
-      <section className="bg-secondary">
+      <section className="bg-black">
         <div className="mx-auto max-w-7xl px-6 py-32 md:py-44">
           <div className="text-center">
             <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
@@ -356,7 +400,7 @@ export default function Home() {
       </section>
 
       {/* ─────────────────────────  FOOTER  ──────────────────────────── */}
-      <footer className="border-t border-border bg-background">
+      <footer className="border-t border-border bg-black">
         <div className="mx-auto grid max-w-7xl gap-12 px-6 py-16 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <Link
