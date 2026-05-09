@@ -31,7 +31,7 @@ export default function Home() {
       <section className="relative isolate overflow-hidden bg-black">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 z-0 opacity-100"
+          className="pointer-events-none absolute inset-0 z-0 opacity-55"
         >
           <GridMotionField
             gradientColor="transparent"
