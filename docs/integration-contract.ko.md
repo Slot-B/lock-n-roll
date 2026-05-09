@@ -107,7 +107,7 @@ export const ENV: Record<Network, {
   LOCK_N_ROLL_PROGRAM_ID: string;
   STREAMFLOW_PROGRAM_ID: string;
   USDC_MINT: string;
-  EXPECTED_STREAMFLOW_VERSION: number;  // C4: B0 결과로 채움
+  EXPECTED_STREAMFLOW_VERSION: number;  // B0 측정값으로 PR
   RPC_URL: string;
 }> = {
   localnet: { /* ... */ },
@@ -115,7 +115,7 @@ export const ENV: Record<Network, {
     LOCK_N_ROLL_PROGRAM_ID: "9PR9oNvarS2iektAP84Zdcs4akh3a2NML8XVw75ih4gu",
     STREAMFLOW_PROGRAM_ID: "HqDGZjaVRXJ9MGRQEw7qDc2rAr6iH1n1kAQdCZaCMfMZ",
     USDC_MINT: "<TBD>",
-    EXPECTED_STREAMFLOW_VERSION: 0,    // ← B0 통과 후 PR로 채움
+    EXPECTED_STREAMFLOW_VERSION: 0,    // ← B0 측정값으로 PR (현재 placeholder)
     RPC_URL: "https://api.devnet.solana.com",
   },
   mainnet: { /* ... */ },
@@ -514,12 +514,12 @@ Frontend는 자체 캐시 (React Query 등)를 두고, **WS 이벤트 수신 시
 ### 6.1 의존성 그래프
 
 ```
-[B0 spike] ──┐
-             │
 [Anchor IDL] ─┬─► [Backend 인덱서] ──► [REST/WS]
               │                          │
               └─► [Frontend SDK 빌드]    └─► [Frontend UI]
 ```
+
+(B0 스파이크는 통과했으므로 그래프에서 제거됨. 자세한 내역은 design-document.ko.md §0.1 v1.4 → v1.5 changelog 참고.)
 
 ### 6.2 IDL 동결 전 작업 가능 항목
 
@@ -527,7 +527,7 @@ IDL이 안정화되기 전에도 3팀이 멈추지 않도록:
 
 | 팀 | IDL 동결 전 가능한 일 |
 |---|---|
-| Blockchain | B0 스파이크, 7 instruction 스캐폴드, 단위 테스트 |
+| Blockchain | 7 instruction 스캐폴드, 단위 테스트 |
 | Backend | DB migration, REST 스켈레톤 + **Mock 핸들러** (고정 fixture 응답), WS 서버 골격, 멱등성 테스트 |
 | Frontend | wallet 연결, 라우팅, **Mock REST 서버** (MSW)로 UI, env 모듈, stream picker UI |
 
@@ -585,7 +585,8 @@ v1은 단일 환경(devnet)에서 끝까지 가는 것을 전제로 함. **versi
 각 팀이 첫 통합 전(Day 1 종료 시)에 완료해야 할 것:
 
 ### Blockchain
-- [ ] B0 스파이크 통과 + `EXPECTED_STREAMFLOW_VERSION` PR
+- [x] B0 스파이크 통과 (완료)
+- [ ] `EXPECTED_STREAMFLOW_VERSION` 실제 측정값 PR
 - [ ] `shared/idl/lock_n_roll.json` 첫 버전 커밋
 - [ ] `shared/pda.ts` seed 공식 합의
 
