@@ -21,7 +21,7 @@ export function VestingScheduleCard({ listing }: VestingScheduleCardProps) {
 
   return (
     <Card className="p-5">
-      <h2 className="font-display text-sm uppercase tracking-wider">
+      <h2 className="font-display text-sm uppercase tracking-normal">
         Vesting Schedule
       </h2>
 

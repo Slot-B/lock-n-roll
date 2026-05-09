@@ -58,6 +58,7 @@ const config: Config = {
           mist: "#9babbf",
           canvas: "#f9faf9",
           gold: "#c89b3c",
+          yellow: "#ffb800",
         },
         sidebar: {
           DEFAULT: "var(--sidebar)",
@@ -71,7 +72,12 @@ const config: Config = {
         },
       },
       fontFamily: {
-        display: ["var(--font-display)", "system-ui", "sans-serif"],
+        display: [
+          "var(--font-robot-dreamer)",
+          "var(--font-display)",
+          "system-ui",
+          "sans-serif",
+        ],
         robot: [
           "var(--font-robot-dreamer)",
           "var(--font-display)",

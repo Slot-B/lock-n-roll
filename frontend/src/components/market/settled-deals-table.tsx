@@ -25,7 +25,7 @@ export function SettledDealsTable({ trades }: SettledDealsTableProps) {
   return (
     <section className="space-y-3">
       <div className="flex items-baseline justify-between">
-        <h2 className="font-display text-xl tracking-tight">Settled Deals</h2>
+        <h2 className="font-display text-xl tracking-normal">Settled Deals</h2>
         <span className="font-mono text-[11px] text-muted-foreground">
           most recent · last 30 days
         </span>

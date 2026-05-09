@@ -3,8 +3,8 @@ import localFont from "next/font/local";
 
 /**
  * LOCK N ROLL — typography
- * - Orbitron: distinctive sci-fi / robotic display headline
- * - Robot Dreamer: hero-only brand headline
+ * - Robot Dreamer: display headlines and short subheads
+ * - Orbitron: display fallback
  * - Space Grotesk: descriptions, subtitles, body / UI text
  * - IBM Plex Mono: numbers, addresses, code fragments
  */

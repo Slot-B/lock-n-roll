@@ -25,7 +25,7 @@ export function Header() {
             className="h-9 w-9 object-contain"
             priority
           />
-          <span className="font-display text-base font-semibold uppercase tracking-tight">
+          <span className="font-display text-base font-semibold uppercase tracking-normal">
             Lock&nbsp;N&nbsp;Roll
           </span>
         </Link>

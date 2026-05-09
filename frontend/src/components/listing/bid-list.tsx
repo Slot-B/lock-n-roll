@@ -19,7 +19,7 @@ export function BidList({ listing, bids }: BidListProps) {
   return (
     <Card className="p-5 bg-card border-border">
       <div className="flex items-baseline justify-between">
-        <h2 className="font-display text-sm uppercase tracking-wider">
+        <h2 className="font-display text-sm uppercase tracking-normal">
           Current Bids
           <span className="ml-2 text-muted-foreground">({bids.length})</span>
         </h2>

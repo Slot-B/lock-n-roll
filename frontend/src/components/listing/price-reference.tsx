@@ -15,7 +15,7 @@ export function PriceReference({
   const market = listing.token.marketPriceUsd;
   return (
     <Card className="p-5 bg-card border-border">
-      <h2 className="font-display text-sm uppercase tracking-wider">
+      <h2 className="font-display text-sm uppercase tracking-normal">
         Price Reference
       </h2>
       <dl className="mt-4 space-y-3 text-xs">

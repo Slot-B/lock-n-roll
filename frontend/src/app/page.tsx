@@ -113,7 +113,7 @@ export default function Home() {
             </span>
           </h1>
 
-          <p className="hero-copy mt-10 max-w-2xl text-balance font-sans text-lg font-medium leading-relaxed text-white/75 sm:text-xl md:text-[22px] md:leading-[1.45]">
+          <p className="hero-copy mt-10 max-w-2xl text-balance font-display text-lg font-normal uppercase leading-relaxed text-white/80 sm:text-xl md:text-[22px] md:leading-[1.45]">
             Trade locked vesting tokens — without unlocking them. Streamflow
             keeps custody. Only the recipient right moves, atomically with
             USDC.
@@ -131,7 +131,7 @@ export default function Home() {
 
       {/* ───────────────  VALUE PROP — single big claim  ─────────────── */}
       <section className="mx-auto max-w-5xl px-6 pb-32 text-center md:pb-44">
-        <h2 className="font-display font-semibold tracking-[-0.03em] text-primary">
+        <h2 className="font-display font-semibold tracking-normal text-primary">
           <Shuffle
             text="Every locked stream."
             tag="span"
@@ -142,7 +142,7 @@ export default function Home() {
             stagger={0.04}
             triggerOnce
             triggerOnHover
-            className="font-display font-semibold tracking-[-0.03em] text-primary"
+            className="font-display font-semibold tracking-normal text-primary"
             style={{
               display: "block",
               fontSize: "clamp(40px, 7vw, 90px)",
@@ -160,7 +160,7 @@ export default function Home() {
             stagger={0.04}
             triggerOnce
             triggerOnHover
-            className="font-display font-semibold tracking-[-0.03em] text-primary"
+            className="font-display font-semibold tracking-normal text-primary"
             style={{
               display: "block",
               fontSize: "clamp(40px, 7vw, 90px)",
@@ -169,7 +169,7 @@ export default function Home() {
             }}
           />
         </h2>
-        <p className="mx-auto mt-7 max-w-xl text-balance text-base leading-relaxed text-muted-foreground md:text-lg">
+        <p className="mx-auto mt-7 max-w-xl text-balance font-display text-base font-normal uppercase leading-relaxed text-muted-foreground md:text-lg">
           Lock N Roll lists Streamflow vesting contracts as tradable
           rights. The token never leaves the original stream — just the
           recipient does.
@@ -180,7 +180,7 @@ export default function Home() {
       <section className="mx-auto max-w-7xl px-6 pb-32 md:pb-44">
         <div className="grid gap-5 md:grid-cols-3">
           <FeatureCard
-            tone="ice"
+            tone="charcoal"
             kicker="01 / Custody"
             title="Streamflow-native"
             body="Locked tokens stay in the original vesting contract. No unwrap, no shadow stream, no wrapper token."
@@ -206,12 +206,12 @@ export default function Home() {
           <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
             / Settlement path
           </span>
-          <h2 className="mx-auto mt-4 max-w-4xl font-display text-[clamp(40px,7vw,90px)] font-semibold leading-[0.95] tracking-[-0.03em] text-primary">
+          <h2 className="mx-auto mt-4 max-w-4xl font-display text-[clamp(40px,7vw,90px)] font-semibold leading-[0.95] tracking-normal text-primary">
             The token stays locked.
             <br />
             The right changes hands.
           </h2>
-          <p className="mx-auto mt-7 max-w-2xl text-balance text-base leading-relaxed text-muted-foreground md:text-lg">
+          <p className="mx-auto mt-7 max-w-2xl text-balance font-display text-base font-normal uppercase leading-relaxed text-muted-foreground md:text-lg">
             Three steps, one Solana transaction. The stream contract never
             knows it changed owners.
           </p>
@@ -246,11 +246,11 @@ export default function Home() {
             <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
               / Trust model
             </span>
-            <h2 className="mt-4 font-display text-[clamp(36px,6vw,72px)] font-semibold leading-[0.95] tracking-[-0.025em] text-primary">
+            <h2 className="mt-4 font-display text-[clamp(36px,6vw,72px)] font-semibold leading-[0.95] tracking-normal text-primary">
               The secure way<br />
               to trade locked tokens.
             </h2>
-            <p className="mt-7 max-w-md text-balance text-base leading-relaxed text-muted-foreground md:text-lg">
+            <p className="mt-7 max-w-md text-balance font-display text-base font-normal uppercase leading-relaxed text-muted-foreground md:text-lg">
               No custody, no approvals beyond Streamflow itself, no proprietary
               wrapper. Every step is verifiable on-chain.
             </p>
@@ -271,7 +271,7 @@ export default function Home() {
             <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
               / Market preview
             </span>
-            <h2 className="mx-auto mt-4 max-w-3xl font-display text-[clamp(40px,7vw,90px)] font-semibold leading-[0.95] tracking-[-0.03em] text-primary">
+            <h2 className="mx-auto mt-4 max-w-3xl font-display text-[clamp(40px,7vw,90px)] font-semibold leading-[0.95] tracking-normal text-primary">
               Locked-token<br />
               opportunities, live.
             </h2>
@@ -301,7 +301,7 @@ export default function Home() {
           <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
             / FAQ
           </span>
-          <h2 className="mt-4 font-display text-[clamp(36px,6vw,72px)] font-semibold leading-[0.95] tracking-[-0.025em] text-primary">
+          <h2 className="mt-4 font-display text-[clamp(36px,6vw,72px)] font-semibold leading-[0.95] tracking-normal text-primary">
             Common questions
           </h2>
         </div>
@@ -338,25 +338,21 @@ export default function Home() {
       </section>
 
       {/* ────────────────────────  FINAL CTA  ──────────────────────── */}
-      <section className="mx-auto max-w-7xl px-6 pb-32 md:pb-44">
-        <div className="relative overflow-hidden rounded-[44px] bg-brand-ice px-8 py-20 text-center md:px-16 md:py-28">
-          <div className="relative">
-            <h2 className="mx-auto max-w-3xl font-display text-[clamp(40px,7vw,90px)] font-semibold leading-[0.95] tracking-[-0.03em] text-primary">
-              Roll your locked stream.
-            </h2>
-            <p className="mx-auto mt-6 max-w-xl text-balance text-base leading-relaxed text-foreground/70 md:text-lg">
-              Connect a wallet, pick a vesting contract, list it in under a
-              minute. The recipient right transfers atomically.
-            </p>
-            <Link
-              href="/create"
-              className="group mt-10 inline-flex h-16 items-center justify-center gap-2 rounded-button-lg bg-primary px-10 text-base font-medium text-primary-foreground transition-all hover:bg-foreground active:translate-y-px"
-            >
-              Create Listing
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </div>
-        </div>
+      <section className="mx-auto max-w-7xl px-6 py-32 text-center md:py-44">
+        <h2 className="mx-auto max-w-3xl font-display text-[clamp(40px,7vw,90px)] font-semibold leading-[0.95] tracking-normal text-brand-yellow">
+          Roll your locked stream.
+        </h2>
+        <p className="mx-auto mt-6 max-w-xl text-balance font-display text-base font-normal uppercase leading-relaxed text-muted-foreground md:text-lg">
+          Connect a wallet, pick a vesting contract, list it in under a
+          minute. The recipient right transfers atomically.
+        </p>
+        <Link
+          href="/create"
+          className="group mt-10 inline-flex h-16 items-center justify-center gap-2 rounded-button-lg bg-primary px-10 text-base font-medium text-primary-foreground transition-all hover:bg-foreground active:translate-y-px"
+        >
+          Create Listing
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+        </Link>
       </section>
 
       {/* ─────────────────────────  FOOTER  ──────────────────────────── */}
@@ -374,7 +370,7 @@ export default function Home() {
                 height={36}
                 className="h-9 w-9 rounded-full bg-card object-contain"
               />
-              <span className="font-display text-base font-semibold uppercase tracking-tight">
+              <span className="font-display text-base font-semibold uppercase tracking-normal">
                 Lock N Roll
               </span>
             </Link>
@@ -429,16 +425,18 @@ function FeatureCard({
   title,
   body,
 }: {
-  tone: "ice" | "pebble" | "violet";
+  tone: "charcoal" | "ice" | "pebble" | "violet";
   kicker: string;
   title: string;
   body: string;
 }) {
   const toneStyles = {
+    charcoal: "bg-brand-charcoal text-white",
     ice: "bg-brand-ice text-foreground",
     pebble: "bg-secondary text-foreground",
     violet: "bg-brand-violet/25 text-foreground",
   } as const;
+  const darkTone = tone === "charcoal";
   return (
     <div
       className={cn(
@@ -446,13 +444,23 @@ function FeatureCard({
         toneStyles[tone],
       )}
     >
-      <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-foreground/55">
+      <span
+        className={cn(
+          "text-[11px] font-medium uppercase tracking-[0.18em]",
+          darkTone ? "text-white/60" : "text-foreground/55",
+        )}
+      >
         {kicker}
       </span>
-      <h3 className="mt-6 font-display text-3xl font-semibold leading-[1.05] tracking-tight md:text-4xl">
+      <h3 className="mt-6 font-display text-3xl font-semibold leading-[1.05] tracking-normal md:text-4xl">
         {title}
       </h3>
-      <p className="mt-5 text-sm leading-relaxed text-foreground/75 md:text-base">
+      <p
+        className={cn(
+          "mt-5 text-sm leading-relaxed md:text-base",
+          darkTone ? "text-white/78" : "text-foreground/75",
+        )}
+      >
         {body}
       </p>
     </div>
@@ -478,7 +486,7 @@ function StepCard({
         </div>
         <span className="font-mono text-sm text-muted-foreground">{step}</span>
       </div>
-      <h3 className="mt-8 font-display text-2xl font-semibold leading-tight tracking-tight text-foreground">
+      <h3 className="mt-8 font-display text-2xl font-semibold leading-tight tracking-normal text-foreground">
         {title}
       </h3>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
@@ -511,7 +519,7 @@ function FaqItem({
   return (
     <details className="group/faq rounded-[28px] bg-secondary px-6 py-5 transition-colors open:bg-card md:px-8 md:py-6 [&_summary]:list-none [&_summary::-webkit-details-marker]:hidden">
       <summary className="flex cursor-pointer items-center justify-between gap-6 text-left">
-        <span className="font-display text-lg font-medium leading-snug tracking-tight text-foreground md:text-xl">
+        <span className="font-display text-lg font-medium leading-snug tracking-normal text-foreground md:text-xl">
           {question}
         </span>
         <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-foreground/15 bg-card transition-colors group-open/faq:border-brand-violet group-open/faq:bg-brand-violet group-open/faq:text-white">
