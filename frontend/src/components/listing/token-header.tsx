@@ -27,7 +27,7 @@ export function TokenHeader({ listing }: TokenHeaderProps) {
         <TokenIcon token={token} size={64} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h1 className="font-display text-3xl tracking-tight">
+            <h1 className="font-display text-3xl tracking-normal">
               {token.symbol}
             </h1>
             <StatusBadge status={status} />

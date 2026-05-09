@@ -12,7 +12,7 @@ export function EscrowInfo({ listing }: EscrowInfoProps) {
     <Card className="p-5">
       <div className="flex items-center gap-2">
         <span className="h-2 w-2 rounded-full bg-brand-blue" aria-hidden />
-        <h2 className="font-display text-sm uppercase tracking-wider">
+        <h2 className="font-display text-sm uppercase tracking-normal">
           Streamflow Recipient · Verified On-Chain
         </h2>
       </div>

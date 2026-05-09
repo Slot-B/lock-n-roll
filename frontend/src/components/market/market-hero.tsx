@@ -5,7 +5,7 @@ interface MarketHeroProps {
 
 /**
  * Hero band on /market.
- * - Display headline (Syne) communicates the differentiator at a glance.
+ * - Display headline uses Robot Dreamer for brand consistency.
  * - Right side shows two key counters.
  * - Decorative grid follows the logo palette without adding image dependency.
  */
@@ -20,12 +20,12 @@ export function MarketHero({ activeCount, settledCount }: MarketHeroProps) {
             <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-brand-blue">
               Streamflow-native OTC
             </div>
-            <h1 className="mt-3 font-display text-4xl font-semibold md:text-6xl tracking-tight leading-[1.05] text-primary">
+            <h1 className="mt-3 font-display text-4xl font-semibold leading-[1.05] tracking-normal text-primary md:text-6xl">
               Trade locked tokens
               <br />
               <span className="text-brand-violet">without unlocking</span>.
             </h1>
-            <p className="mt-4 max-w-xl text-sm text-muted-foreground leading-relaxed">
+            <p className="mt-4 max-w-xl font-display text-sm font-normal uppercase leading-relaxed text-muted-foreground">
               The tokens stay in vesting. Only the right to receive moves.
               Discover open listings below — Buy Now to settle instantly, or
               Place Bid to negotiate price.
