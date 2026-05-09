@@ -14,6 +14,7 @@ import {
 import GridMotionField from "@/components/GridMotionField";
 import HyperspeedField from "@/components/HyperspeedField";
 import Shuffle from "@/components/Shuffle";
+import SplitText from "@/components/SplitText";
 import { ListingCard } from "@/components/domain/listing-card";
 import { MOCK_ACTIVE_LISTING_VIEWS } from "@/lib/mock";
 import { cn } from "@/lib/utils";
@@ -383,9 +384,20 @@ export default function Home() {
 
       {/* ────────────────────────  FINAL CTA  ──────────────────────── */}
       <section className="mx-auto max-w-7xl px-6 py-32 text-center md:py-44">
-        <h2 className="mx-auto max-w-3xl font-display text-[clamp(40px,7vw,90px)] font-semibold leading-[0.95] tracking-normal text-brand-yellow">
-          Roll your locked stream.
-        </h2>
+        <SplitText
+          text="Roll your locked stream."
+          tag="h2"
+          className="max-w-3xl font-display text-[clamp(40px,7vw,90px)] font-semibold leading-[0.95] tracking-normal text-brand-yellow"
+          delay={50}
+          duration={1.25}
+          ease="power3.out"
+          splitType="chars"
+          from={{ opacity: 0, y: 40 }}
+          to={{ opacity: 1, y: 0 }}
+          threshold={0.1}
+          rootMargin="-100px"
+          textAlign="center"
+        />
         <p className="mx-auto mt-6 max-w-xl text-balance font-display text-base font-normal uppercase leading-relaxed text-muted-foreground md:text-lg">
           Connect a wallet, pick a vesting contract, list it in under a
           minute. The recipient right transfers atomically.
