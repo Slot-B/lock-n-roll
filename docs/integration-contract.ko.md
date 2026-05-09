@@ -167,11 +167,13 @@ design-doc §3.6 그대로. Backend는 다음 5개 이벤트만 처리:
 
 | 이벤트 | 핵심 필드 (요약) |
 |---|---|
-| `ListingCreated` | `listing_pda, maker, streamflow_metadata, token_mint, token_decimals, vesting_amount_raw, asking_price_micro_usdc, expires_at, slot` |
-| `BidSubmitted` | `bid_pda, listing_pda, bidder, price_per_token_micro_usdc, total_usdc_raw, slot` |
-| `BidWithdrawn` | `bid_pda, listing_pda, bidder, total_usdc_raw, slot` |
-| `OrderTaken` | `listing_pda, ..., mode("asking"/"bid"), accepted_bid_pda?, swept_token_amount, slot` |
-| `ListingCancelled` / `ListingExpired` | `listing_pda, maker, streamflow_metadata, swept_token_amount, slot` |
+| `ListingCreated` | `listing, maker, streamflow_metadata, token_mint, token_decimals, vesting_amount_raw, asking_price_micro_usdc, expires_at, slot, block_timestamp` |
+| `BidSubmitted` | `bid, listing, bidder, price_per_token_micro_usdc, total_usdc_raw, slot, block_timestamp` |
+| `BidWithdrawn` | `bid, listing, bidder, total_usdc_raw, slot, block_timestamp` |
+| `OrderTaken` | `listing, streamflow_metadata, maker, taker, token_mint, vesting_amount_raw, price_per_token_micro_usdc, total_usdc_raw, fee, mode({asking:{}}/{bid:{}}), accepted_bid?, swept_token_amount, slot, block_timestamp` |
+| `ListingCancelled` / `ListingExpired` | `listing, maker, streamflow_metadata, swept_token_amount, slot, block_timestamp` |
+
+> IDL 필드명은 PDA임을 자명히 알 수 있는 경우 접미사 `_pda`를 생략한다 (예: `listing`, `bid`, `accepted_bid`). Backend가 §3.4 멱등성/§5 REST API 응답에서 사용하는 `listing_pda`/`bid_pda` 표기는 API 계층 컨벤션 — Backend의 indexer 핸들러에서 IDL 페이로드를 읽을 때 매핑 책임은 Backend에 있다.
 
 **Blockchain은 이 6개 이외의 이벤트를 emit하지 않는다.** 추가하려면 본 문서 PR 필수.
 
@@ -223,11 +225,11 @@ export const bidPda = (
 
 | Instruction | 필수 계정 (mut/signer 표기) | Frontend 사전 처리 |
 |---|---|---|
-| `create_listing` | `maker (mut, signer)`, `listing_pda (mut)`, `listing_token_ata (mut)`, `streamflow_metadata`, `token_mint`, `streamflow_program`, ATA/Token/System/Rent/Compute | `listing_token_ata` 미존재 시 **같은 tx에서** `createATA` 선행 instruction 추가 |
-| `submit_bid` | `bidder (mut, signer)`, `bid_pda (mut)`, `bid_usdc_vault (mut)`, `bidder_usdc_source (mut)`, `usdc_mint`, `listing`, ATA/Token/System | vault ATA를 idempotent createATA로 동봉 |
-| `buy_now` | `taker (mut, signer)`, `listing (mut)`, `listing_pda`, `listing_token_ata (mut)`, `taker_token_ata (mut)`, `taker_usdc_source (mut)`, `maker_usdc_dest (mut)`, Streamflow CPI 계정 set, programs | `taker_token_ata` 미존재 시 createATA 선행 / CU 한도 prepend |
-| `accept_bid` | `maker (mut, signer)`, `listing (mut)`, `bid (mut)`, `bid_usdc_vault (mut)`, `maker_usdc_dest (mut)`, `bidder_token_ata (mut)`, `listing_token_ata (mut)`, Streamflow CPI 계정 set | `bidder_token_ata` 미존재 시 maker가 대신 createATA |
-| `withdraw_bid` | `bidder (mut, signer)`, `bid (mut)`, `bid_usdc_vault (mut)`, `bidder_usdc_dest (mut)`, programs | — |
+| `create_listing` | `maker (mut, signer)`, `listing (mut)`, `listing_token_ata (mut)`, `streamflow_metadata`, `token_mint`, `streamflow_program`, ATA/Token/System/Rent/Compute | `listing_token_ata` 미존재 시 **같은 tx에서** `createATA` 선행 instruction 추가 |
+| `submit_bid` | `bidder (mut, signer)`, `bid (mut)`, `bid_vault (mut)`, `bidder_usdc_account (mut)`, `usdc_mint`, `listing`, ATA/Token/System | vault ATA를 idempotent createATA로 동봉 |
+| `buy_now` | `taker (mut, signer)`, `listing (mut)`, `listing_token_ata (mut)`, `taker_token_ata (mut)`, `taker_usdc_account (mut)`, `maker_usdc_account (mut)`, Streamflow CPI 계정 set, programs | `taker_token_ata` 미존재 시 createATA 선행 / CU 한도 prepend |
+| `accept_bid` | `maker (mut, signer)`, `listing (mut)`, `bid (mut)`, `bid_vault (mut)`, `maker_usdc_account (mut)`, `bidder_token_ata (mut)`, `listing_token_ata (mut)`, Streamflow CPI 계정 set | `bidder_token_ata` 미존재 시 maker가 대신 createATA |
+| `withdraw_bid` | `bidder (mut, signer)`, `bid (mut)`, `bid_vault (mut)`, `bidder_usdc_account (mut)`, programs | — |
 | `cancel_listing` | `maker (mut, signer)`, `listing (mut)`, `maker_token_ata (mut)`, `listing_token_ata (mut)`, Streamflow CPI 계정 set | `maker_token_ata` createATA |
 | `claim_expired` | `payer (mut, signer)`, `listing (mut)`, `listing.maker`, `maker_token_ata (mut)`, `listing_token_ata (mut)`, Streamflow CPI 계정 set | 누구나 호출 가능. payer는 본인 |
 
