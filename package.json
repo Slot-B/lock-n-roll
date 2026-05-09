@@ -1,0 +1,18 @@
+{
+  "name": "lock-n-roll",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "shared",
+    "backend"
+  ],
+  "scripts": {
+    "build:shared": "npm run build --workspace=@lock-n-roll/shared",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "dev:backend": "npm run dev --workspace=@lock-n-roll/backend",
+    "db:migrate": "npm run db:migrate --workspace=@lock-n-roll/backend",
+    "db:seed": "npm run db:seed --workspace=@lock-n-roll/backend",
+    "test:indexer": "npm exec --workspace=@lock-n-roll/backend -- tsx scripts/test-indexer.ts",
+    "test:reconcile": "npm exec --workspace=@lock-n-roll/backend -- tsx scripts/test-reconciliation.ts"
+  }
+}

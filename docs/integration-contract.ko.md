@@ -107,15 +107,15 @@ export const ENV: Record<Network, {
   LOCK_N_ROLL_PROGRAM_ID: string;
   STREAMFLOW_PROGRAM_ID: string;
   USDC_MINT: string;
-  EXPECTED_STREAMFLOW_VERSION: number;  // B0 측정값으로 PR
+  EXPECTED_STREAMFLOW_VERSION: number;  // 현재 4 (Devnet)
   RPC_URL: string;
 }> = {
   localnet: { /* ... */ },
   devnet: {
     LOCK_N_ROLL_PROGRAM_ID: "9PR9oNvarS2iektAP84Zdcs4akh3a2NML8XVw75ih4gu",
     STREAMFLOW_PROGRAM_ID: "HqDGZjaVRXJ9MGRQEw7qDc2rAr6iH1n1kAQdCZaCMfMZ",
-    USDC_MINT: "<TBD>",
-    EXPECTED_STREAMFLOW_VERSION: 0,    // ← B0 측정값으로 PR (현재 placeholder)
+    USDC_MINT: "<TBD>",                // 여전히 채워야 함
+    EXPECTED_STREAMFLOW_VERSION: 4,    // B0에서 확인된 Devnet contract.version
     RPC_URL: "https://api.devnet.solana.com",
   },
   mainnet: { /* ... */ },
@@ -586,7 +586,7 @@ v1은 단일 환경(devnet)에서 끝까지 가는 것을 전제로 함. **versi
 
 ### Blockchain
 - [x] B0 스파이크 통과 (완료)
-- [ ] `EXPECTED_STREAMFLOW_VERSION` 실제 측정값 PR
+- [x] `EXPECTED_STREAMFLOW_VERSION = 4` 확정
 - [ ] `shared/idl/lock_n_roll.json` 첫 버전 커밋
 - [ ] `shared/pda.ts` seed 공식 합의
 

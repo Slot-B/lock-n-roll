@@ -606,12 +606,12 @@ Frontend와 Backend는 §2.3의 동일한 자격 규칙을 사용해야 하며, 
 | `LOCK_N_ROLL_PROGRAM_ID` | `localnet` | `<DEV_LNR>` | `<PROD_LNR>` |
 | `STREAMFLOW_PROGRAM_ID` | `streamflow-mock` | `HqDGZjaVRXJ9MGRQEw7qDc2rAr6iH1n1kAQdCZaCMfMZ` | `strmRqUCoQUgGUan5YhzUZa6KqdzwX5L6FpUxfmKg5m` |
 | `USDC_MINT` | local test mint | devnet test USDC mint | canonical mainnet USDC mint |
-| `EXPECTED_STREAMFLOW_VERSION` | (Devnet stream 값과 일치) | **B0에서 측정된 Devnet `contract.version` (값을 PR로 채울 것)** | (업그레이드 관측되지 않는 한 Devnet과 일치; audit 후 PR로 변경) |
+| `EXPECTED_STREAMFLOW_VERSION` | `4` | `4` | `4` (업그레이드 관측되지 않는 한 Devnet과 일치; audit 후 PR로 변경) |
 | Anchor crate 버전 | 0.30.x (핀) | 0.30.x | 0.30.x |
 | streamflow-sdk crate 버전 | 0.13.0 (핀) | 0.13.0 | 0.13.0 |
-| `@streamflow/stream` 패키지 버전 | SDK 0.13.0과 매칭되는 latest | 동일 | 동일 |
+| `@streamflow/stream` 패키지 버전 | 8.4.0 (핀) | 8.4.0 | 8.4.0 |
 
-Devnet QA 전 실제 `USDC_MINT`와 `EXPECTED_STREAMFLOW_VERSION` 값을 채워야 합니다.
+Devnet QA 전 실제 `USDC_MINT` 값을 채워야 합니다. `EXPECTED_STREAMFLOW_VERSION = 4`는 B0 스파이크에서 확인된 값으로 핀됨. JS와 Rust SDK는 독립적으로 버저닝되며, v1은 `@streamflow/stream@8.4.0` + `streamflow-sdk = "=0.13.0"` 조합을 사용합니다.
 
 ### 6.2 공통 타입
 

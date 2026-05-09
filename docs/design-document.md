@@ -605,12 +605,12 @@ Frontend and backend must use the same eligibility rules from §2.3 and surface 
 | `LOCK_N_ROLL_PROGRAM_ID` | `localnet` | `<DEV_LNR>` | `<PROD_LNR>` |
 | `STREAMFLOW_PROGRAM_ID` | `streamflow-mock` | `HqDGZjaVRXJ9MGRQEw7qDc2rAr6iH1n1kAQdCZaCMfMZ` | `strmRqUCoQUgGUan5YhzUZa6KqdzwX5L6FpUxfmKg5m` |
 | `USDC_MINT` | local test mint | devnet test USDC mint | canonical mainnet USDC mint |
-| `EXPECTED_STREAMFLOW_VERSION` | (matches Devnet stream value) | **Devnet `contract.version` measured during B0 (PR the value)** | (matches Devnet unless an upgrade is observed; bump via PR after audit) |
+| `EXPECTED_STREAMFLOW_VERSION` | `4` | `4` | `4` (matches Devnet unless an upgrade is observed; bump via PR after audit) |
 | Anchor crate version | 0.30.x (pinned) | 0.30.x | 0.30.x |
 | streamflow-sdk crate version | 0.13.0 (pinned) | 0.13.0 | 0.13.0 |
-| `@streamflow/stream` package version | latest matching SDK 0.13.0 | latest matching SDK 0.13.0 | latest matching SDK 0.13.0 |
+| `@streamflow/stream` package version | 8.4.0 (pinned) | 8.4.0 | 8.4.0 |
 
-The team must fill real `USDC_MINT` and `EXPECTED_STREAMFLOW_VERSION` values before Devnet QA.
+The team must fill the real `USDC_MINT` value before Devnet QA. `EXPECTED_STREAMFLOW_VERSION = 4` was captured during the B0 spike and is now pinned. JS and Rust SDKs are versioned independently — `@streamflow/stream@8.4.0` pairs with `streamflow-sdk = "=0.13.0"` for v1.
 
 ### 6.2 Shared Types
 
