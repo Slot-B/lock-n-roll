@@ -11,7 +11,8 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-import AntigravityField from "@/components/AntigravityField";
+import GridMotionField from "@/components/GridMotionField";
+import Shuffle from "@/components/Shuffle";
 import { ListingCard } from "@/components/domain/listing-card";
 import { MOCK_ACTIVE_LISTING_VIEWS } from "@/lib/mock";
 import { cn } from "@/lib/utils";
@@ -24,33 +25,95 @@ export default function Home() {
       {/* ──────────────────────────  HERO  ─────────────────────────── */}
       {/* Mirrors ctrl.xyz "Take [logo]" treatment — logo glyph embedded
           inline inside the headline, single CTA, clean canvas. */}
-      <section className="relative isolate overflow-hidden bg-background">
-        <AntigravityBackdrop className="top-[47%] z-0 opacity-100 mix-blend-multiply" />
-        <div className="relative z-10 mx-auto flex min-h-[calc(100svh-80px)] max-w-6xl flex-col items-center justify-center px-6 py-24 text-center md:py-32">
-          <Image
-            src="/brand/lock-n-roll-logo.png"
-            alt=""
-            width={148}
-            height={148}
-            priority
-            className="hero-logo-float mb-8 h-20 w-20 object-contain sm:h-24 sm:w-24"
+      <section className="relative isolate overflow-hidden bg-black">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-0 opacity-100"
+        >
+          <GridMotionField
+            gradientColor="transparent"
+            items={[
+              "#ffb800", "#000000", "#e23eff", "#ffffff", "#000000", "#0099ff", "#ffb800",
+              "#0099ff", "#ffb800", "#000000", "#e23eff", "#ffb800", "#000000", "#e23eff",
+              "#e23eff", "#000000", "#ffb800", "#0099ff", "#000000", "#ffffff", "#ffb800",
+              "#000000", "#0099ff", "#e23eff", "#000000", "#ffb800", "#000000", "#0099ff",
+            ]}
           />
-          <h1 className="font-display text-[5.25rem] font-extrabold uppercase leading-[0.82] text-primary sm:text-[7rem] md:text-[10rem] lg:text-[12.5rem]">
-            <span className="hero-word block" style={{ animationDelay: "80ms" }}>
-              Lock
+        </div>
+        <div className="relative z-10 mx-auto flex min-h-[calc(100svh-80px)] max-w-6xl flex-col items-center justify-center px-6 py-24 text-center md:py-32">
+          <h1 className="font-robot font-bold tracking-normal text-white">
+            {/* Line 1: LOCK [logo inline] */}
+            <span className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+              <Shuffle
+                text="LOCK"
+                tag="span"
+                shuffleDirection="right"
+                duration={0.55}
+                shuffleTimes={2}
+                animationMode="evenodd"
+                stagger={0.04}
+                triggerOnce
+                triggerOnHover
+                className="font-robot font-bold tracking-normal text-white"
+                style={{
+                  display: "inline-block",
+                  fontSize: "clamp(72px, 15vw, 176px)",
+                  lineHeight: 0.92,
+                  textTransform: "uppercase",
+                }}
+              />
+              <Image
+                src="/brand/lock-n-roll-logo-transparent.png"
+                alt=""
+                width={200}
+                height={200}
+                priority
+                className="hero-logo-float h-[clamp(66px,13.8vw,162px)] w-[clamp(66px,13.8vw,162px)] object-contain"
+              />
             </span>
-            <span
-              className="hero-word mt-2 flex items-center justify-center gap-[0.12em]"
-              style={{ animationDelay: "220ms" }}
-            >
-              <span className="hero-accent text-brand-violet" aria-label="N">
-                N
-              </span>
-              <span>Roll</span>
+            {/* Line 2: N(accent) ROLL */}
+            <span className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+              <Shuffle
+                text="N"
+                tag="span"
+                shuffleDirection="right"
+                duration={0.55}
+                shuffleTimes={2}
+                animationMode="evenodd"
+                stagger={0.04}
+                triggerOnce
+                triggerOnHover
+                className="font-robot font-bold tracking-normal"
+                style={{
+                  display: "inline-block",
+                  fontSize: "clamp(72px, 15vw, 176px)",
+                  lineHeight: 0.92,
+                  textTransform: "uppercase",
+                  color: "var(--brand-violet)",
+                }}
+              />
+              <Shuffle
+                text="ROLL"
+                tag="span"
+                shuffleDirection="right"
+                duration={0.55}
+                shuffleTimes={2}
+                animationMode="evenodd"
+                stagger={0.04}
+                triggerOnce
+                triggerOnHover
+                className="font-robot font-bold tracking-normal text-white"
+                style={{
+                  display: "inline-block",
+                  fontSize: "clamp(72px, 15vw, 176px)",
+                  lineHeight: 0.92,
+                  textTransform: "uppercase",
+                }}
+              />
             </span>
           </h1>
 
-          <p className="hero-copy mt-10 max-w-2xl text-balance font-sans text-lg font-medium leading-relaxed text-muted-foreground sm:text-xl md:text-[22px] md:leading-[1.45]">
+          <p className="hero-copy mt-10 max-w-2xl text-balance font-sans text-lg font-medium leading-relaxed text-white/75 sm:text-xl md:text-[22px] md:leading-[1.45]">
             Trade locked vesting tokens — without unlocking them. Streamflow
             keeps custody. Only the recipient right moves, atomically with
             USDC.
@@ -58,7 +121,7 @@ export default function Home() {
 
           <Link
             href="/market"
-            className="group mt-12 inline-flex h-16 items-center justify-center gap-2 rounded-button-lg bg-primary px-10 text-base font-medium text-primary-foreground transition-all hover:bg-foreground active:translate-y-px"
+            className="group mt-12 inline-flex h-16 items-center justify-center gap-2 rounded-button-lg bg-white px-10 text-base font-medium text-black transition-all hover:bg-brand-ice active:translate-y-px"
           >
             Open Market
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -68,10 +131,43 @@ export default function Home() {
 
       {/* ───────────────  VALUE PROP — single big claim  ─────────────── */}
       <section className="mx-auto max-w-5xl px-6 pb-32 text-center md:pb-44">
-        <h2 className="font-display text-[clamp(40px,7vw,90px)] font-semibold leading-[0.95] tracking-[-0.03em] text-primary">
-          Every locked stream.
-          <br />
-          One protocol.
+        <h2 className="font-display font-semibold tracking-[-0.03em] text-primary">
+          <Shuffle
+            text="Every locked stream."
+            tag="span"
+            shuffleDirection="right"
+            duration={0.5}
+            shuffleTimes={2}
+            animationMode="evenodd"
+            stagger={0.04}
+            triggerOnce
+            triggerOnHover
+            className="font-display font-semibold tracking-[-0.03em] text-primary"
+            style={{
+              display: "block",
+              fontSize: "clamp(40px, 7vw, 90px)",
+              lineHeight: 0.95,
+              textTransform: "uppercase",
+            }}
+          />
+          <Shuffle
+            text="One protocol."
+            tag="span"
+            shuffleDirection="right"
+            duration={0.5}
+            shuffleTimes={2}
+            animationMode="evenodd"
+            stagger={0.04}
+            triggerOnce
+            triggerOnHover
+            className="font-display font-semibold tracking-[-0.03em] text-primary"
+            style={{
+              display: "block",
+              fontSize: "clamp(40px, 7vw, 90px)",
+              lineHeight: 0.95,
+              textTransform: "uppercase",
+            }}
+          />
         </h2>
         <p className="mx-auto mt-7 max-w-xl text-balance text-base leading-relaxed text-muted-foreground md:text-lg">
           Lock N Roll lists Streamflow vesting contracts as tradable
@@ -272,7 +368,7 @@ export default function Home() {
               className="inline-flex items-center gap-2.5 text-foreground"
             >
               <Image
-                src="/brand/lock-n-roll-logo.png"
+                src="/brand/lock-n-roll-logo-transparent.png"
                 alt="LOCK N ROLL"
                 width={36}
                 height={36}
@@ -326,38 +422,6 @@ export default function Home() {
 }
 
 // ─── Local primitives ─────────────────────────────────────────────────
-
-function AntigravityBackdrop({ className }: { className?: string }) {
-  return (
-    <div
-      aria-hidden
-      className={cn(
-        "pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
-        className,
-      )}
-    >
-      <div style={{ width: "1080px", height: "1080px", position: "relative" }}>
-        <AntigravityField
-          count={500}
-          magnetRadius={15}
-          ringRadius={13}
-          waveSpeed={0.4}
-          waveAmplitude={1.8}
-          particleSize={2.5}
-          lerpSpeed={0.14}
-          color="#eccdea"
-          autoAnimate
-          particleVariance={0.7}
-          rotationSpeed={0.1}
-          depthFactor={1}
-          pulseSpeed={3}
-          particleShape="box"
-          fieldStrength={10}
-        />
-      </div>
-    </div>
-  );
-}
 
 function FeatureCard({
   tone,

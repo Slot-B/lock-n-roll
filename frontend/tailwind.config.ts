@@ -57,6 +57,7 @@ const config: Config = {
           ice: "#d6e0ed",
           mist: "#9babbf",
           canvas: "#f9faf9",
+          gold: "#c89b3c",
         },
         sidebar: {
           DEFAULT: "var(--sidebar)",
@@ -71,6 +72,12 @@ const config: Config = {
       },
       fontFamily: {
         display: ["var(--font-display)", "system-ui", "sans-serif"],
+        robot: [
+          "var(--font-robot-dreamer)",
+          "var(--font-display)",
+          "system-ui",
+          "sans-serif",
+        ],
         sans: [
           "var(--font-sans)",
           "-apple-system",

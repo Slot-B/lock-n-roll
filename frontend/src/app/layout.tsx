@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { cn } from "@/lib/utils";
-import { fontDisplay, fontSans, fontMono } from "./fonts";
+import { fontDisplay, fontSans, fontMono, fontRobotDreamer } from "./fonts";
 import { AppProviders } from "@/components/providers/app-providers";
 import { Header } from "@/components/layout/header";
 import "./globals.css";
@@ -23,6 +23,7 @@ export default function RootLayout({
         fontDisplay.variable,
         fontSans.variable,
         fontMono.variable,
+        fontRobotDreamer.variable,
       )}
       suppressHydrationWarning
     >

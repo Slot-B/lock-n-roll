@@ -18,7 +18,7 @@ export function Header() {
           className="inline-flex items-center gap-2.5 rounded-pill text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/30"
         >
           <Image
-            src="/brand/lock-n-roll-logo.png"
+            src="/brand/lock-n-roll-logo-transparent.png"
             alt="LOCK N ROLL logo"
             width={36}
             height={36}
