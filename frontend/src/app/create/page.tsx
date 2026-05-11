@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { ArrowLeft, ArrowRight, LockKeyhole, Wallet } from "lucide-react";
 
+import ElectricBorder from "@/components/ElectricBorder";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -83,7 +84,7 @@ export default function CreatePage() {
               onChange={(e) => setStreamPda(e.target.value.trim())}
               spellCheck={false}
               autoComplete="off"
-              className="mt-2 border-white/10 bg-black/40 font-mono text-foreground placeholder:text-foreground/35"
+              className="mt-2 rounded-[6px] border-white/15 bg-white/[0.04] font-mono text-foreground placeholder:text-foreground/35"
             />
             {streamPda.length > 0 && !isValidPda && (
               <p className="mt-2 text-xs text-destructive">
@@ -115,7 +116,7 @@ export default function CreatePage() {
                   placeholder="0.00"
                   value={askingPriceUsdc}
                   onChange={(e) => setAskingPriceUsdc(e.target.value)}
-                  className="mt-2 border-white/10 bg-black/40 font-mono text-foreground placeholder:text-foreground/35"
+                  className="mt-2 rounded-[6px] border-white/15 bg-white/[0.04] font-mono text-foreground placeholder:text-foreground/35"
                 />
                 <p className="mt-2 text-xs text-foreground/55">
                   Buyers can hit Buy Now at this price for instant settlement.
@@ -134,7 +135,7 @@ export default function CreatePage() {
                 max={720}
                 value={expiryHours}
                 onChange={(e) => setExpiryHours(Number(e.target.value))}
-                className="mt-2 border-white/10 bg-black/40 font-mono text-foreground"
+                className="mt-2 rounded-[6px] border-white/15 bg-white/[0.04] font-mono text-foreground"
               />
               <p className="mt-2 text-xs text-foreground/55">
                 Auto-cancels and refunds open bids after this window.
@@ -160,7 +161,7 @@ export default function CreatePage() {
               type="submit"
               disabled={!canSubmit || submitting}
               className={cn(
-                "group inline-flex h-14 items-center justify-center gap-2 rounded-button-lg bg-white px-9 text-base font-medium text-black transition-all",
+                "group inline-flex h-14 items-center justify-center gap-2 rounded-[10px] bg-white px-9 text-base font-medium text-black transition-all",
                 "hover:bg-brand-ice active:translate-y-px",
                 "disabled:cursor-not-allowed disabled:bg-white/20 disabled:text-foreground/45 disabled:hover:bg-white/20",
               )}
@@ -187,23 +188,32 @@ function Step({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-[24px] border border-white/10 bg-card/40 px-6 py-7 md:px-8 md:py-8">
-      <div className="flex items-baseline gap-3">
-        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-          / {number}
-        </span>
-        <h2 className="font-display text-xl font-semibold uppercase tracking-tight text-white md:text-2xl">
-          {title}
-        </h2>
-      </div>
-      <div className="mt-5">{children}</div>
-    </section>
+    <ElectricBorder
+      color="#EAB308"
+      speed={1}
+      chaos={0.11}
+      borderRadius={8}
+      className=""
+      style={{ borderRadius: 8 }}
+    >
+      <section className="rounded-[8px] bg-card px-6 py-7 md:px-8 md:py-8">
+        <div className="flex items-baseline gap-3">
+          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            / {number}
+          </span>
+          <h2 className="font-display text-xl font-semibold uppercase tracking-tight text-white md:text-2xl">
+            {title}
+          </h2>
+        </div>
+        <div className="mt-5">{children}</div>
+      </section>
+    </ElectricBorder>
   );
 }
 
 function ConnectPrompt() {
   return (
-    <div className="mt-8 flex items-start gap-3 rounded-[20px] border border-brand-violet/30 bg-brand-violet/10 px-5 py-4 text-sm text-foreground">
+    <div className="mt-8 flex items-start gap-3 rounded-[8px] border border-brand-violet/30 bg-brand-violet/10 px-5 py-4 text-sm text-foreground">
       <Wallet className="mt-0.5 h-4 w-4 shrink-0 text-brand-violet" />
       <div>
         <span className="font-medium">Connect your wallet first.</span>
@@ -232,7 +242,7 @@ function Toggle({
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="flex w-full items-start justify-between gap-4 rounded-[16px] border border-white/10 bg-black/30 px-4 py-3 text-left transition-colors hover:border-white/20"
+      className="flex w-full items-start justify-between gap-4 rounded-[6px] border border-white/15 bg-white/[0.04] px-4 py-3 text-left transition-colors hover:border-white/30"
     >
       <span className="flex flex-col gap-0.5">
         <span className="text-sm font-medium text-foreground">{label}</span>
@@ -257,7 +267,7 @@ function Toggle({
 
 function StreamPreview({ pda }: { pda: string }) {
   return (
-    <div className="mt-5 rounded-[16px] border border-white/10 bg-black/40 px-5 py-4">
+    <div className="mt-5 rounded-[8px] border border-white/15 bg-white/[0.04] px-5 py-4">
       <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground">
         <LockKeyhole className="h-3 w-3" />
         Stream preview · mock

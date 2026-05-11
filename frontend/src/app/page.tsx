@@ -15,6 +15,7 @@ import GridMotionField from "@/components/GridMotionField";
 import GridScanField from "@/components/GridScanField";
 import HyperspeedField from "@/components/HyperspeedField";
 import LazyOnView from "@/components/lazy-on-view";
+import RiseInView from "@/components/rise-in-view";
 import Shuffle from "@/components/Shuffle";
 import SplitText from "@/components/SplitText";
 import { ListingCard } from "@/components/domain/listing-card";
@@ -123,13 +124,15 @@ export default function Home() {
             USDC.
           </p>
 
-          <Link
-            href="/market"
-            className="group mt-12 inline-flex h-16 items-center justify-center gap-2 rounded-button-lg bg-white px-10 text-base font-medium text-black transition-all hover:bg-brand-ice active:translate-y-px"
-          >
-            Open Market
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
+          <RiseInView className="mt-12">
+            <Link
+              href="/market"
+              className="group inline-flex h-16 items-center justify-center gap-2 rounded-button-lg bg-white px-10 text-base font-medium text-black transition-all hover:bg-brand-ice active:translate-y-px"
+            >
+              Open Market
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </RiseInView>
         </div>
       </section>
 
@@ -149,24 +152,30 @@ export default function Home() {
       {/* ─────────────  TRUST CARDS — 3 large pill cards  ─────────────── */}
       <section className="mx-auto max-w-7xl px-6 pb-32 md:pb-44">
         <div className="grid gap-5 md:grid-cols-3">
-          <FeatureCard
-            tone="charcoal"
-            kicker="01 / Custody"
-            title="Streamflow-native"
-            body="Locked tokens stay in the original vesting contract. No unwrap, no shadow stream, no wrapper token."
-          />
-          <FeatureCard
-            tone="violet"
-            kicker="02 / Settlement"
-            title="PDA settlement"
-            body="The listing PDA holds the recipient authority — never the underlying token. The program enforces atomic swaps."
-          />
-          <FeatureCard
-            tone="pebble"
-            kicker="03 / Bids"
-            title="Refundable bids"
-            body="Open bids stay withdrawable after a listing is sold or cancelled. No capital ever stuck in escrow."
-          />
+          <RiseInView delay={0} className="h-full">
+            <FeatureCard
+              tone="charcoal"
+              kicker="01 / Custody"
+              title="Streamflow-native"
+              body="Locked tokens stay in the original vesting contract. No unwrap, no shadow stream, no wrapper token."
+            />
+          </RiseInView>
+          <RiseInView delay={0.1} className="h-full">
+            <FeatureCard
+              tone="violet"
+              kicker="02 / Settlement"
+              title="PDA settlement"
+              body="The listing PDA holds the recipient authority — never the underlying token. The program enforces atomic swaps."
+            />
+          </RiseInView>
+          <RiseInView delay={0.2} className="h-full">
+            <FeatureCard
+              tone="pebble"
+              kicker="03 / Bids"
+              title="Refundable bids"
+              body="Open bids stay withdrawable after a listing is sold or cancelled. No capital ever stuck in escrow."
+            />
+          </RiseInView>
         </div>
       </section>
 
@@ -232,12 +241,20 @@ export default function Home() {
               wrapper. Every step is verifiable on-chain.
             </p>
           </div>
-          <ul className="flex flex-col gap-3">
-            <TrustBullet text="Streamflow Vesting recipient transfer — no token movement." />
-            <TrustBullet text="Atomic settlement — recipient and USDC swap in one tx." />
-            <TrustBullet text="Refundable bids — losing bids withdraw at any time." />
-            <TrustBullet text="No protocol custody — listings hold authority, not assets." />
-          </ul>
+          <div className="flex flex-col gap-3">
+            <RiseInView delay={0}>
+              <TrustBullet text="Streamflow Vesting recipient transfer — no token movement." />
+            </RiseInView>
+            <RiseInView delay={0.12}>
+              <TrustBullet text="Atomic settlement — recipient and USDC swap in one tx." />
+            </RiseInView>
+            <RiseInView delay={0.24}>
+              <TrustBullet text="Refundable bids — losing bids withdraw at any time." />
+            </RiseInView>
+            <RiseInView delay={0.36}>
+              <TrustBullet text="No protocol custody — listings hold authority, not assets." />
+            </RiseInView>
+          </div>
         </div>
       </section>
 
@@ -284,13 +301,15 @@ export default function Home() {
           </div>
 
           <div className="mt-12 flex justify-center">
-            <Link
-              href="/market"
-              className="group inline-flex h-14 items-center gap-2 rounded-button-lg border border-foreground bg-card px-8 text-sm font-medium text-foreground transition-colors hover:bg-foreground hover:text-background"
-            >
-              Open full market
-              <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </Link>
+            <RiseInView>
+              <Link
+                href="/market"
+                className="group inline-flex h-14 items-center gap-2 rounded-button-lg border border-foreground bg-card px-8 text-sm font-medium text-foreground transition-colors hover:bg-foreground hover:text-background"
+              >
+                Open full market
+                <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </Link>
+            </RiseInView>
           </div>
         </div>
       </section>
@@ -357,13 +376,15 @@ export default function Home() {
           Connect a wallet, pick a vesting contract, list it in under a
           minute. The recipient right transfers atomically.
         </p>
-        <Link
-          href="/create"
-          className="group mt-10 inline-flex h-16 items-center justify-center gap-2 rounded-button-lg bg-primary px-10 text-base font-medium text-primary-foreground transition-all hover:bg-foreground active:translate-y-px"
-        >
-          Create Listing
-          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-        </Link>
+        <RiseInView className="mt-10">
+          <Link
+            href="/create"
+            className="group inline-flex h-16 items-center justify-center gap-2 rounded-button-lg bg-primary px-10 text-base font-medium text-primary-foreground transition-all hover:bg-foreground active:translate-y-px"
+          >
+            Create Listing
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
+        </RiseInView>
       </section>
 
       {/* ─────────────────────────  FOOTER  ──────────────────────────── */}
@@ -509,14 +530,14 @@ function StepCard({
 
 function TrustBullet({ text }: { text: string }) {
   return (
-    <li className="flex items-start gap-4 rounded-[24px] bg-card p-5 md:p-6">
+    <div className="flex items-start gap-4 rounded-[24px] bg-card p-5 md:p-6">
       <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-foreground text-background">
         <Check className="h-3.5 w-3.5" strokeWidth={3} />
       </span>
       <span className="text-base leading-snug text-foreground md:text-lg">
         {text}
       </span>
-    </li>
+    </div>
   );
 }
 

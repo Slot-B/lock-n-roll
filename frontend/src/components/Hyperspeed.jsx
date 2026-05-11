@@ -494,6 +494,12 @@ const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS }) => {
       }
 
       init() {
+        // Bail if dispose() ran while loadAssets() was pending — this
+        // happens in React StrictMode (dev) where the component
+        // mounts → unmounts → remounts. Without this guard, the stale
+        // app's init runs on a disposed renderer and addPass() reads
+        // alpha from a null WebGL context.
+        if (this.disposed) return;
         this.initPasses();
         const options = this.options;
         this.road.init();
