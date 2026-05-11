@@ -14,6 +14,7 @@ import {
 import GridMotionField from "@/components/GridMotionField";
 import GridScanField from "@/components/GridScanField";
 import HyperspeedField from "@/components/HyperspeedField";
+import LazyOnView from "@/components/lazy-on-view";
 import Shuffle from "@/components/Shuffle";
 import SplitText from "@/components/SplitText";
 import { ListingCard } from "@/components/domain/listing-card";
@@ -172,12 +173,12 @@ export default function Home() {
       {/* ────────────────────  SETTLEMENT PATH  ───────────────────── */}
       <section className="relative isolate overflow-hidden bg-black">
         {/* Hyperspeed cyberpunk tunnel — full-bleed, behind content */}
-        <div
+        <LazyOnView
           aria-hidden
           className="pointer-events-none absolute inset-0 z-0 opacity-90"
         >
           <HyperspeedField preset="one" />
-        </div>
+        </LazyOnView>
         <div className="relative z-10 mx-auto max-w-7xl px-6 py-32 text-center md:py-44">
           <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
             / Settlement path
@@ -243,7 +244,7 @@ export default function Home() {
       {/* ─────────────────────  MARKET PREVIEW  ───────────────────── */}
       <section className="relative isolate overflow-hidden bg-black">
         {/* GridScan — full-bleed scan-line grid, behind content */}
-        <div
+        <LazyOnView
           aria-hidden
           className="pointer-events-none absolute inset-0 z-0"
         >
@@ -264,7 +265,7 @@ export default function Home() {
             scanDelay={2}
             scanOnClick={false}
           />
-        </div>
+        </LazyOnView>
         <div className="relative z-10 mx-auto max-w-7xl px-6 py-32 md:py-44">
           <div className="text-center">
             <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">

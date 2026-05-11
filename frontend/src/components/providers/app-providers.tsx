@@ -1,15 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
+import dynamic from "next/dynamic";
+import { useEffect, useMemo, useState } from "react";
 import {
   ConnectionProvider,
   WalletProvider,
 } from "@solana/wallet-adapter-react";
-import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-import {
-  PhantomWalletAdapter,
-  SolflareWalletAdapter,
-} from "@solana/wallet-adapter-wallets";
+import type { Adapter } from "@solana/wallet-adapter-base";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -19,6 +16,18 @@ import { getNetworkConfig } from "@/lib/network";
 // Wallet UI default styles. We override the modal in globals.css later.
 import "@solana/wallet-adapter-react-ui/styles.css";
 
+// WalletModalProvider (and the modal it renders) lives in a separate
+// chunk so it does not block first paint. `useWalletModal()` from the
+// same package returns a safe no-op default until the chunk arrives,
+// so the Connect button is inert for a frame on cold load.
+const WalletModalProvider = dynamic(
+  () =>
+    import("@solana/wallet-adapter-react-ui").then(
+      (mod) => mod.WalletModalProvider,
+    ),
+  { ssr: false },
+);
+
 /**
  * Tree of all client-side providers needed before any UI renders.
  *
@@ -26,7 +35,7 @@ import "@solana/wallet-adapter-react-ui/styles.css";
  *   QueryClientProvider
  *     ConnectionProvider (network-aware via Zustand)
  *       WalletProvider (autoConnect)
- *         WalletModalProvider
+ *         WalletModalProvider (dynamic, client-only)
  *           {children}
  *
  * Network changes mutate `endpoint` → React reconnects automatically.
@@ -35,13 +44,25 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
   const network = useAppStore((s) => s.network);
   const config = useMemo(() => getNetworkConfig(network), [network]);
 
-  // Explicit adapters as a fallback for wallets that do not implement
-  // the Wallet Standard. Wallets that do (Phantom, Solflare on recent
-  // versions, Backpack, etc.) are auto-detected even with an empty list.
-  const wallets = useMemo(
-    () => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
-    [],
-  );
+  // Adapter constructors are loaded after hydration so the
+  // wallet-adapter-wallets bundle (which pulls in adapters for many
+  // chains) does not enter the initial JS chunk. Wallet Standard
+  // wallets are auto-detected even with an empty starting list.
+  const [wallets, setWallets] = useState<Adapter[]>([]);
+
+  useEffect(() => {
+    let canceled = false;
+    void import("@solana/wallet-adapter-wallets").then((mod) => {
+      if (canceled) return;
+      setWallets([
+        new mod.PhantomWalletAdapter(),
+        new mod.SolflareWalletAdapter(),
+      ]);
+    });
+    return () => {
+      canceled = true;
+    };
+  }, []);
 
   // Single QueryClient instance per app. `staleTime: 60s` matches the
   // Redis cache TTL on the backend (spec §4.3) so we don't refetch
