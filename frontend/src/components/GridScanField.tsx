@@ -21,9 +21,9 @@ export type GridScanFieldProps = {
   scanOnClick?: boolean;
 };
 
-// Lazy, client-only — GridScan pulls in `three`, `postprocessing`, and
-// `face-api.js`, which all need a browser environment and would balloon
-// the SSR bundle if imported eagerly.
+// Lazy, client-only — GridScan pulls in `three` and `postprocessing`,
+// which both need a browser environment and would balloon the SSR
+// bundle if imported eagerly.
 const GridScan = dynamic<GridScanFieldProps>(
   () =>
     import("./GridScan").then(
