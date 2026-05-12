@@ -648,6 +648,7 @@ const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS }) => {
 
       tick() {
         if (this.disposed) return;
+        if (this.paused) return;
 
         if (!this.hasValidSize) {
           const w = this.container.offsetWidth;
@@ -1175,9 +1176,30 @@ const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS }) => {
 
     const myApp = new App(container, options);
     appRef.current = myApp;
+    myApp.paused = false;
     myApp.loadAssets().then(myApp.init);
 
+    // Pause the WebGL RAF when the section scrolls out of view, resume when
+    // it comes back. Keeps GPU idle while the user is in other sections.
+    const io = new IntersectionObserver(
+      (entries) => {
+        const visible = entries[0]?.isIntersecting ?? true;
+        if (!appRef.current || appRef.current.disposed) return;
+        if (visible) {
+          if (appRef.current.paused) {
+            appRef.current.paused = false;
+            appRef.current.tick();
+          }
+        } else {
+          appRef.current.paused = true;
+        }
+      },
+      { rootMargin: '200px' },
+    );
+    io.observe(container);
+
     return () => {
+      io.disconnect();
       if (appRef.current) {
         appRef.current.dispose();
         appRef.current = null;

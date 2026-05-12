@@ -494,7 +494,12 @@ export const GridScan = ({
     window.addEventListener('resize', onResize);
 
     let last = performance.now();
+    let running = true;
     const tick = () => {
+      if (!running) {
+        rafRef.current = null;
+        return;
+      }
       const now = performance.now();
       const dt = Math.max(0, Math.min(0.1, (now - last) / 1000));
       last = now;
@@ -541,7 +546,33 @@ export const GridScan = ({
     };
     rafRef.current = requestAnimationFrame(tick);
 
+    // Pause the WebGL RAF when this section scrolls out of view, resume
+    // when it comes back. Keeps GPU idle while the user is elsewhere.
+    const io =
+      typeof IntersectionObserver !== 'undefined'
+        ? new IntersectionObserver(
+            (entries) => {
+              const visible = entries[0]?.isIntersecting ?? true;
+              if (visible && !running) {
+                running = true;
+                if (!rafRef.current) {
+                  rafRef.current = requestAnimationFrame(tick);
+                }
+              } else if (!visible && running) {
+                running = false;
+                if (rafRef.current) {
+                  cancelAnimationFrame(rafRef.current);
+                  rafRef.current = null;
+                }
+              }
+            },
+            { rootMargin: '200px' },
+          )
+        : null;
+    if (io) io.observe(container);
+
     return () => {
+      if (io) io.disconnect();
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       window.removeEventListener('resize', onResize);
       material.dispose();

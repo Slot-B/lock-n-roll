@@ -40,13 +40,34 @@ const GridMotion = ({ items = [], gradientColor = 'black' }) => {
       });
     };
 
-    const removeAnimationLoop = gsap.ticker.add(updateMotion);
+    let tickerActive = true;
+    gsap.ticker.add(updateMotion);
 
     window.addEventListener('mousemove', handleMouseMove);
 
+    // Pause GSAP ticker when scrolled out of view, resume when back.
+    const io =
+      typeof IntersectionObserver !== 'undefined' && gridRef.current
+        ? new IntersectionObserver(
+            (entries) => {
+              const visible = entries[0]?.isIntersecting ?? true;
+              if (visible && !tickerActive) {
+                gsap.ticker.add(updateMotion);
+                tickerActive = true;
+              } else if (!visible && tickerActive) {
+                gsap.ticker.remove(updateMotion);
+                tickerActive = false;
+              }
+            },
+            { rootMargin: '200px' },
+          )
+        : null;
+    if (io && gridRef.current) io.observe(gridRef.current);
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
-      removeAnimationLoop();
+      if (tickerActive) gsap.ticker.remove(updateMotion);
+      if (io) io.disconnect();
     };
   }, []);
 
